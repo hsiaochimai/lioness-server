@@ -11,8 +11,8 @@ CREATE TABLE users (
     email TEXT NOT NULL,
     full_name TEXT NOT NULL,
     role_id INTEGER REFERENCES roles(id) NOT NULL,
-    phone INTEGER NOT NULL
-    
+    phone VARCHAR NOT NULL
+
 );
 
 CREATE TABLE projects (
@@ -35,14 +35,18 @@ CREATE TABLE contractors_projects (
      PRIMARY KEY (contractor_id, project_id)
 );
 
--- CREATE TABLE clients_projects (
---     client_id int REFERENCES users(id) NOT NULL,
---     project_id int REFERENCES projects(id) NOT NULL
--- );
--- CREATE TABLE project_managers_projects (
---     project_manager_id int REFERENCES users(id) NOT NULL,
---     project_id int REFERENCES projects(id) NOT NULL
--- );
+CREATE TABLE clients_projects (
+    client_id int REFERENCES users(id) NOT NULL,
+    project_id int REFERENCES projects(id) NOT NULL,
+     CONSTRAINT clients_projects_pkey
+     PRIMARY KEY (client_id, project_id)
+);
+CREATE TABLE project_managers_projects (
+    project_manager_id int REFERENCES users(id) NOT NULL,
+    project_id int REFERENCES projects(id) NOT NULL,
+    CONSTRAINT project_managers_projects_pkey
+     PRIMARY KEY (project_manager_id, project_id)
+);
 
 
 
