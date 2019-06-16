@@ -15,11 +15,11 @@ const seedData = async () => {
 
     await knex('project_statuses').insert(data.statuses)
         .then(res => {
-            console.log('statuses inserted')
+            console.log('statuses inserted', res.rowCount)
         })
     await knex('roles').insert(data.roles)
         .then(res => {
-            console.log('roles inserted')
+            console.log('roles inserted', res.rowCount)
         })
 
     const users = data.users.map(i => {
@@ -28,7 +28,7 @@ const seedData = async () => {
     })
     await knex('users').insert(users)
         .then(res => {
-            console.log('users inserted')
+            console.log('users inserted', res.rowCount)
         })
         .catch(handleError)
 
@@ -38,7 +38,7 @@ const seedData = async () => {
     })
     await knex('projects').insert(projects)
         .then(res => {
-            console.log('projects inserted')
+            console.log('projects inserted', res.rowCount)
         })
         .catch(handleError)
 
@@ -49,44 +49,37 @@ const seedData = async () => {
             })
             return acc
         }, [])
-    console.log('initial contractors:', contractorRecords.length)
-    contractorRecords = [...new Set(contractorRecords)]
-    console.log('unique contractors:', contractorRecords.length)
+
+    // console.log('initial contractors:', contractorRecords.length)
+    // contractorRecords = [...new Set(contractorRecords)]
+    // console.log('unique contractors:', contractorRecords.length)
 
     await knex.raw(`
-    SELECT 'SELECT SETVAL(' ||
-       quote_literal(quote_ident(PGT.schemaname) || '.' || quote_ident(S.relname)) ||
-       ', COALESCE(MAX(' ||quote_ident(C.attname)|| '), 1) ) FROM ' ||
-       quote_ident(PGT.schemaname)|| '.'||quote_ident(T.relname)|| ';'
-FROM pg_class AS S,
-     pg_depend AS D,
-     pg_class AS T,
-     pg_attribute AS C,
-     pg_tables AS PGT
-WHERE S.relkind = 'S'
-    AND S.oid = D.objid
-    AND D.refobjid = T.oid
-    AND D.refobjid = C.attrelid
-    AND D.refobjsubid = C.attnum
-    AND T.relname = PGT.tablename
-ORDER BY S.relname;
+    SELECT setval('projects_id_seq', max(id))
+    FROM  projects
     `)
         .then(res => {
-            console.log('sequences updated')
+            console.log('sequences updated', res.rowCount)
+        })
+        .catch(handleError)
+    await knex.raw(`
+        SELECT setval('users_id_seq', max(id))
+        FROM users
+        `)
+        .then(res => {
+            console.log('sequences updated', res.rowCount)
         })
         .catch(handleError)
 
-    // contractorRecords.forEach(async cr => {
-    //     await knex('contractors_projects').insert(cr)
-    //         .then(res => {
-    //             console.log('contractors_projects inserted')
-    //         })
-    //         .catch(handleError)
-    // })
 
-    await knex('contractors_projects').insert(contractorRecords)
+
+    await knex.raw(
+        knex('contractors_projects').insert(contractorRecords).
+            toString()
+        + ' ON CONFLICT DO NOTHING'
+    )
         .then(res => {
-            console.log('contractors_projects inserted')
+            console.log('contractors_projects inserted', res.rowCount)
         })
         .catch(handleError)
 
@@ -99,5 +92,3 @@ seedData().finally(() => {
     knex.destroy()
 })
 
-// data.statuses.forEach(i => {
-// });
