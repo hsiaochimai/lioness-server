@@ -60,24 +60,24 @@ const seedData = async () => {
         }
         return true
     })
-    
+
     // update sequences
-    await knex.raw(`
-    SELECT setval('projects_id_seq', max(id))
-    FROM  projects
-    `)
-        .then(res => {
-            console.log('sequences updated', res.rowCount)
-        })
-        .catch(handleError)
-    await knex.raw(`
-        SELECT setval('users_id_seq', max(id))
-        FROM users
-        `)
-        .then(res => {
-            console.log('sequences updated', res.rowCount)
-        })
-        .catch(handleError)
+    // await knex.raw(`
+    // SELECT setval('projects_id_seq', max(id))
+    // FROM  projects
+    // `)
+    //     .then(res => {
+    //         console.log('sequences updated', res.rowCount)
+    //     })
+    //     .catch(handleError)
+    // await knex.raw(`
+    //     SELECT setval('users_id_seq', max(id))
+    //     FROM users
+    //     `)
+    //     .then(res => {
+    //         console.log('sequences updated', res.rowCount)
+    //     })
+    //     .catch(handleError)
 
 
 
@@ -91,7 +91,6 @@ const seedData = async () => {
         })
         .catch(handleError)
 
-    // console.log(contractorRecords)
 
 }
 
