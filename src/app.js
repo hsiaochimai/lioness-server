@@ -65,10 +65,11 @@ const projectsDefaultOptions = {
   pageNumber: 1,
 }
 
-app.get('/api/projects', async (req, res) => {
+app.get('/api/projects/*', async (req, res) => {
 
   let requestOpts = {}
-  const mergedOpts = { ...projectsDefaultOptions, ...requestOpts }
+
+  const mergedOpts = { ...projectsDefaultOptions, ...req.query }
   const knex = app.get('db')
 
   const projects = knex('projects').select('*')
@@ -89,6 +90,18 @@ app.get('/api/projects', async (req, res) => {
   })
 
   let promises = []
+
+  result.forEach(project => {
+    const statusQuery = knex('project_statuses').select('*')
+      .where('id', project.status_id)
+      .first()
+    console.log(statusQuery.toString())
+    const p = statusQuery.then(res => {
+      project.status = res
+    })
+    promises.push(p)
+  })
+
   result.forEach(project => {
     const clientQuery = knex('users').select('*')
       .where('id', project.client_id)
@@ -96,6 +109,17 @@ app.get('/api/projects', async (req, res) => {
     console.log(clientQuery.toString())
     const p = clientQuery.then(user => {
       project.client = user
+    })
+    promises.push(p)
+  })
+
+  result.forEach(project => {
+    const managerQuery = knex('users').select('*')
+      .where('id', project.manager_id)
+      .first()
+    console.log(managerQuery.toString())
+    const p = managerQuery.then(user => {
+      project.manager = user
     })
     promises.push(p)
   })
@@ -109,9 +133,9 @@ app.get('/api/projects', async (req, res) => {
       })
 
     console.log(contractorsQuery.toString())
-    const p = contractorsQuery.then(user => {
-      project.contractors = project.contractors || []
-      project.contractors.push(user)
+
+    const p = contractorsQuery.then(users => {
+      project.contractors = users
     })
     promises.push(p)
   })
@@ -124,8 +148,8 @@ app.get('/api/projects', async (req, res) => {
 
   res.json({
     data: result,
-    // numPages,
-    // totalItemCount,
+    numPages:100,
+    totalItemCount:100,
   });
 
 });
