@@ -42,6 +42,7 @@ const seedData = async () => {
         })
         .catch(handleError)
 
+
     let contractorRecords = data.projects.reduce(
         (acc, project) => {
             project.contractors.forEach(c => {
@@ -50,10 +51,17 @@ const seedData = async () => {
             return acc
         }, [])
 
-    // console.log('initial contractors:', contractorRecords.length)
-    // contractorRecords = [...new Set(contractorRecords)]
-    // console.log('unique contractors:', contractorRecords.length)
-
+    contractorRecords = contractorRecords.filter((i, index, arr) => {
+        const existing = arr.findIndex(e => e.contractor_id === i.contractor_id
+            && e.project_id === i.project_id)
+        if (existing !== index) {
+            console.log('duplicate', i)
+            return false
+        }
+        return true
+    })
+    
+    // update sequences
     await knex.raw(`
     SELECT setval('projects_id_seq', max(id))
     FROM  projects
@@ -76,7 +84,7 @@ const seedData = async () => {
     await knex.raw(
         knex('contractors_projects').insert(contractorRecords).
             toString()
-        + ' ON CONFLICT DO NOTHING'
+        // + ' ON CONFLICT DO NOTHING'
     )
         .then(res => {
             console.log('contractors_projects inserted', res.rowCount)
