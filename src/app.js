@@ -36,12 +36,7 @@ app.use(helmet())
 //   // move to the next middleware
 //   next()
 // })
-app.get('/api/*', (req, res) => {
-  res.json({ok: true});
-});
-app.get('/',(req,res)=>{
-  res.send('Hello, world!')
-})
+
 app.use(function errorHandler(error, req, res, next) {
     let response
      if (NODE_ENV === 'production') {
@@ -52,5 +47,10 @@ app.use(function errorHandler(error, req, res, next) {
      }
      res.status(500).json(response)
    })
-
+   app.get('/api/*', (req, res) => {
+    res.json({ok: true});
+  });
+  app.get('/',(req,res)=>{
+    res.send('Hello, world!')
+  })
 module.exports = app
