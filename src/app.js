@@ -47,8 +47,87 @@ app.use(function errorHandler(error, req, res, next) {
   }
   res.status(500).json(response)
 })
-app.get('/api/*', (req, res) => {
-  res.json({ ok: true });
+
+const SORT_ASC = 'ASC'
+const SORT_DESC = 'DESC'
+const ITEMS_PER_PAGE = 10
+
+const projectsDefaultOptions = {
+  statusFilter: null,
+  searchQuery: null,
+  budgetSort: SORT_ASC,
+  dateTypeFilter: null,
+  dateSort: null,
+  afterDate: null,
+  beforeDate: null,
+  roleFilter: null,
+  activeProjSortAsc: null,
+  pageNumber: 1,
+}
+
+app.get('/api/projects', async (req, res) => {
+
+  let requestOpts = {}
+  const mergedOpts = { ...projectsDefaultOptions, ...requestOpts }
+  const knex = app.get('db')
+
+  const projects = knex('projects').select('*')
+
+  if (mergedOpts.budgetSort) {
+    projects.orderBy('budget', mergedOpts.budgetSort)
+  }
+
+  const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE
+  projects.offset(begin)
+  projects.limit(ITEMS_PER_PAGE)
+
+  console.log(projects.toString())
+
+  let result = []
+  await projects.then(data => {
+    result = data
+  })
+
+  let promises = []
+  result.forEach(project => {
+    const clientQuery = knex('users').select('*')
+      .where('id', project.client_id)
+      .first()
+    console.log(clientQuery.toString())
+    const p = clientQuery.then(user => {
+      project.client = user
+    })
+    promises.push(p)
+  })
+
+  result.forEach(project => {
+    const contractorsQuery = knex('users').select('*')
+      // .where('project_id', id)
+      .innerJoin('contractors_projects', function () {
+        this.on('users.id', '=', 'contractors_projects.contractor_id')
+          .andOn('contractors_projects.project_id', '=', project.id)
+      })
+
+    console.log(contractorsQuery.toString())
+    const p = contractorsQuery.then(user => {
+      project.contractors = project.contractors || []
+      project.contractors.push(user)
+    })
+    promises.push(p)
+  })
+
+  await Promise.all(promises)
+
+  // const numPages = Math.ceil(res.length / ITEMS_PER_PAGE)
+  // const totalItemCount = res.length
+
+
+  res.json({
+    data: result,
+    // numPages,
+    // totalItemCount,
+  });
+
 });
 app.get('/', (req, res) => {
   app.get('db').select('*').from('users').catch(e => {
