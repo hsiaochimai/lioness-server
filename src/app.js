@@ -8,11 +8,11 @@ const { NODE_ENV } = require('./config')
 const app = express()
 const winston = require('winston');
 const logger = winston.createLogger({
- level: 'info',
- format: winston.format.json(),
- transports: [
-   new winston.transports.File({ filename: 'info.log' })
- ]
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.File({ filename: 'info.log' })
+  ]
 });
 
 const morganOption = (NODE_ENV === 'production')
@@ -38,19 +38,22 @@ app.use(helmet())
 // })
 
 app.use(function errorHandler(error, req, res, next) {
-    let response
-     if (NODE_ENV === 'production') {
-       response = { error: { message: 'server error' } }
-     } else {
-       console.error(error)
-       response = { message: error.message, error }
-     }
-     res.status(500).json(response)
-   })
-   app.get('/api/*', (req, res) => {
-    res.json({ok: true});
-  });
-  app.get('/',(req,res)=>{
-    res.send('Hello, world!')
+  let response
+  if (NODE_ENV === 'production') {
+    response = { error: { message: 'server error' } }
+  } else {
+    console.error(error)
+    response = { message: error.message, error }
+  }
+  res.status(500).json(response)
+})
+app.get('/api/*', (req, res) => {
+  res.json({ ok: true });
+});
+app.get('/', (req, res) => {
+  app.get('db').select('*').from('users').catch(e => {
+    console.error('ERROR', e.message)
   })
+  res.send('Hello, world!')
+})
 module.exports = app
