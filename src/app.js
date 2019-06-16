@@ -52,6 +52,11 @@ const SORT_ASC = 'ASC'
 const SORT_DESC = 'DESC'
 const ITEMS_PER_PAGE = 10
 
+const STATUS_ESTIMATE = 1
+const STATUS_IN_PROGRESS = 2
+const STATUS_BILLED = 3
+const STATUS_OTHER = 4
+
 const projectsDefaultOptions = {
   statusFilter: null,
   searchQuery: null,
@@ -65,93 +70,109 @@ const projectsDefaultOptions = {
   pageNumber: 1,
 }
 
-app.get('/api/projects/*', async (req, res) => {
+const services = {
+  getProjects: async mergedOpts => {
+    const knex = app.get('db')
 
-  let requestOpts = {}
+    const projects = knex('projects')
+    const counter = knex('projects')
 
-  const mergedOpts = { ...projectsDefaultOptions, ...req.query }
-  const knex = app.get('db')
+    //filtering
+    if (mergedOpts.statusFilter) {
+      projects.where('status_id', mergedOpts.statusFilter)
+      counter.where('status_id', mergedOpts.statusFilter)
+    }
 
-  const projects = knex('projects').select('*')
+    //count before paginating
 
-  if (mergedOpts.budgetSort) {
-    projects.orderBy('budget', mergedOpts.budgetSort)
-  }
+    let totalItemCount = +(await counter.count('id'))[0].count
+    const numPages = Math.ceil(totalItemCount / ITEMS_PER_PAGE)
 
-  const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE
-  projects.offset(begin)
-  projects.limit(ITEMS_PER_PAGE)
+    //sorting
+    if (mergedOpts.budgetSort) {
+      projects.orderBy('budget', mergedOpts.budgetSort)
+    }
+    if (mergedOpts.dateSort) {
+      projects.orderBy(mergedOpts.dateTypeFilter, mergedOpts.dateSort)
+    }
 
-  console.log(projects.toString())
+    const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE
+    projects.offset(begin)
+    projects.limit(ITEMS_PER_PAGE)
 
-  let result = []
-  await projects.then(data => {
-    result = data
-  })
+    console.log(projects.toString())
 
-  let promises = []
-
-  result.forEach(project => {
-    const statusQuery = knex('project_statuses').select('*')
-      .where('id', project.status_id)
-      .first()
-    console.log(statusQuery.toString())
-    const p = statusQuery.then(res => {
-      project.status = res
+    let result = []
+    await projects.select('*').then(data => {
+      result = data
     })
-    promises.push(p)
-  })
 
-  result.forEach(project => {
-    const clientQuery = knex('users').select('*')
-      .where('id', project.client_id)
-      .first()
-    console.log(clientQuery.toString())
-    const p = clientQuery.then(user => {
-      project.client = user
-    })
-    promises.push(p)
-  })
+    //populate related records
+    let promises = []
 
-  result.forEach(project => {
-    const managerQuery = knex('users').select('*')
-      .where('id', project.manager_id)
-      .first()
-    console.log(managerQuery.toString())
-    const p = managerQuery.then(user => {
-      project.manager = user
-    })
-    promises.push(p)
-  })
-
-  result.forEach(project => {
-    const contractorsQuery = knex('users').select('*')
-      // .where('project_id', id)
-      .innerJoin('contractors_projects', function () {
-        this.on('users.id', '=', 'contractors_projects.contractor_id')
-          .andOn('contractors_projects.project_id', '=', project.id)
+    result.forEach(project => {
+      const statusQuery = knex('project_statuses').select('*')
+        .where('id', project.status_id)
+        .first()
+      // console.log(statusQuery.toString())
+      const p = statusQuery.then(res => {
+        project.status = res
       })
-
-    console.log(contractorsQuery.toString())
-
-    const p = contractorsQuery.then(users => {
-      project.contractors = users
+      promises.push(p)
     })
-    promises.push(p)
-  })
 
-  await Promise.all(promises)
+    result.forEach(project => {
+      const clientQuery = knex('users').select('*')
+        .where('id', project.client_id)
+        .first()
+      // console.log(clientQuery.toString())
+      const p = clientQuery.then(user => {
+        project.client = user
+      })
+      promises.push(p)
+    })
 
-  // const numPages = Math.ceil(res.length / ITEMS_PER_PAGE)
-  // const totalItemCount = res.length
+    result.forEach(project => {
+      const managerQuery = knex('users').select('*')
+        .where('id', project.manager_id)
+        .first()
+      // console.log(managerQuery.toString())
+      const p = managerQuery.then(user => {
+        project.manager = user
+      })
+      promises.push(p)
+    })
 
+    result.forEach(project => {
+      const contractorsQuery = knex('users').select('*')
+        // .where('project_id', id)
+        .innerJoin('contractors_projects', function () {
+          this.on('users.id', '=', 'contractors_projects.contractor_id')
+            .andOn('contractors_projects.project_id', '=', project.id)
+        })
 
-  res.json({
-    data: result,
-    numPages:100,
-    totalItemCount:100,
-  });
+      // console.log(contractorsQuery.toString())
 
+      const p = contractorsQuery.then(users => {
+        project.contractors = users
+      })
+      promises.push(p)
+    })
+
+    await Promise.all(promises)
+    return {
+      data: result,
+      numPages,
+      totalItemCount,
+    }
+
+  }
+}
+
+app.get('/api/projects/*', async (req, res) => {
+  const mergedOpts = { ...projectsDefaultOptions, ...req.query }
+  const result = await services.getProjects(mergedOpts)
+  res.json(result);
 });
 app.get('/', (req, res) => {
   app.get('db').select('*').from('users').catch(e => {
