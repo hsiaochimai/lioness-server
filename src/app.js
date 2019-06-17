@@ -66,7 +66,6 @@ const projectsDefaultOptions = {
   afterDate: null,
   beforeDate: null,
   roleFilter: null,
-  activeProjSortAsc: null,
   pageNumber: 1,
 }
 
