@@ -6,6 +6,7 @@ const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
 const projectsRouter= require('./projects/projects-router')
 const rolesRouter=require('./roles/roles-router')
+const projectsStatusesRouter=require('./projectStatuses/projectStatuses-router')
 const app = express()
 const winston = require('winston');
 const logger = winston.createLogger({
@@ -51,6 +52,7 @@ app.use(function errorHandler(error, req, res, next) {
 
 app.use('/api/projects', projectsRouter)
 app.use('/api/roles', rolesRouter)
+app.use('/api/project-statuses',projectsStatusesRouter)
 
 app.get('/', (req, res) => {
  res.send('Hello, world!')
