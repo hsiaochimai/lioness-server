@@ -3,12 +3,12 @@ const knex = require("knex");
 const app = require("../src/app");
 const { TEST_DB_URL } = require('../src/config')
 const { API_TOKEN } = process.env;
-const {makeContractorsProjectsArray} =require('./contractors_projects.fixtures')
-const {makeProjectStatusesArray}=require('./project_statuses.fixtures')
+const {makeContractorsProjectsArray} =require('./fixtures/contractors_projects.fixtures')
+const {makeProjectStatusesArray}=require('./fixtures/project_statuses.fixtures')
 const {makeProjectsArray}=require('./projects.fixtures')
 const {makeRolesArray}=require('./roles.fixtures')
 const {makeUsersArray}=require('./users.fixtures')
-const {makeProjectResultArray}=require('./project_result.fixtures')
+const {makeProjectResultArray}=require('./fixtures/project_result.fixtures')
 const { expect } = require("chai");
 describe("Projects Endpoints", function() {
     let db;
