@@ -8,7 +8,8 @@
         {
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/home/tudor/.nvm/versions/node/v10.15.0/bin/node",
+            // "runtimeExecutable": "/home/tudor/.nvm/versions/node/v10.15.0/bin/node",
+            "runtimeVersion":"10.15.0", //use nvm
             "name": "Launch Program",
             "program": "${workspaceFolder}/src/server.js"
         }
