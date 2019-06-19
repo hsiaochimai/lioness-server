@@ -1,5 +1,7 @@
 // const path = require("path");
 const express = require("express");
+const bodyParser = require('body-parser');
+const jsonParser = bodyParser.json();
 // const xss = require("xss");
 const ProjectsService = require("./projects-service");
 const projectsRouter = express.Router();
@@ -16,7 +18,7 @@ const STATUS_OTHER = 4
 const projectsDefaultOptions = {
   statusFilter: null,
   searchQuery: null,
-  budgetSort: null,
+  budgetSort: SORT_ASC,
   dateTypeFilter: null,
   dateSort: null,
   afterDate: null,
@@ -26,12 +28,21 @@ const projectsDefaultOptions = {
 }
 
 projectsRouter
-.route('/')
-.get( async (req, res) => {
+  .route('/create')
+  .post(jsonParser, async (req, res) => {
+    const { project, contractorIDs } = req.body
+    const knex = req.app.get("db");
+    const savedProject = await ProjectsService.upsertProject(knex, project, contractorIDs)
+    res.json(savedProject);
+  })
+
+projectsRouter
+  .route('/')
+  .get(async (req, res) => {
     const knex = req.app.get("db");
     const mergedOpts = { ...projectsDefaultOptions, ...req.query }
     const result = await ProjectsService.getProjects(knex, mergedOpts)
     res.json(result);
   });
 
-  module.exports = projectsRouter;
+module.exports = projectsRouter;
