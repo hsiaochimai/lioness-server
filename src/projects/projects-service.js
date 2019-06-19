@@ -2,8 +2,10 @@
 
 const ProjectsService = {
   upsertProject: async (knex, project, contractorIDs) => {
+
+    // nullify empty values
     Object.keys(project).forEach(k => { if (project[k] === "") { project[k] = null } })
-    let res
+
     let { id } = project
     const isNew = id === -1
     delete project.id
@@ -13,7 +15,7 @@ const ProjectsService = {
       console.log(await knex('projects')
         .insert(project, ['id']).toString());
 
-      res = await knex('projects')
+      await knex('projects')
         .insert(project, ['id'])
         .then(returnedInfo => {
           console.log('INSERT got:', returnedInfo)
@@ -21,24 +23,22 @@ const ProjectsService = {
           return returnedInfo
         })
     } else {
-      res = await knex('projects')
+      await knex('projects')
         .where('id', '=', id)
         .update(project)
         .then(returnedInfo => {
           console.log('UPDATE got:', returnedInfo)
           return returnedInfo
         })
+      await knex('contractors_projects')
+        .where('project_id', '=', id)
+        .del()
+        .then(() => {
+          console.log(`deleted previous contractors for ${id}`)
+        })
     }
 
-    await knex('contractors_projects')
-      .where('project_id', '=', id)
-      .del()
-      .then(() => {
-        console.log(`deleted previous contractors for ${id}`)
-      })
-
     const contractorRecords = contractorIDs.map(cID => { return { project_id: id, contractor_id: cID } })
-
     await knex('contractors_projects')
       .insert(contractorRecords)
       .then(() => {
