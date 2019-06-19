@@ -7,7 +7,18 @@ function handleError(e) {
     console.error('ERROR', e.message)
 }
 
+const clearData = async (knex) => {
+    return knex
+        .raw('TRUNCATE contractors_projects, projects, users, project_statuses, roles RESTART IDENTITY CASCADE')
+        .then(() => {
+            console.log('data cleared')
+        });
+}
+
 const seedData = async (data, knex) => {
+    const now = new Date().getTime()
+
+    await clearData(knex)
 
     await knex('project_statuses').insert(data.statuses)
         .then(res => {
@@ -38,7 +49,7 @@ const seedData = async (data, knex) => {
         })
         .catch(handleError)
 
-    if (data.projects) { //if thins is a flatted structure 
+    if (!data.contractors_projects) { //if thins is a flatted structure 
 
 
         let contractorRecords = data.projects.reduce(
@@ -70,7 +81,7 @@ const seedData = async (data, knex) => {
             .catch(handleError)
     }
 
-    if (data.contractors_projects) {
+    else {
         await
             knex('contractors_projects').insert(data.contractors_projects)
                 .then(res => {
@@ -99,12 +110,13 @@ const seedData = async (data, knex) => {
 
 
 
-
+    const spentMillis = new Date().getTime() - now
+    console.log(`seedData took ${(spentMillis / 1000).toFixed(3)} seconds`);
 
 
 }
 
-module.exports = seedData
+module.exports = { clearData, seedData }
 
 if (require.main === module) { //if called as node seedData.js
     const knex = db()
