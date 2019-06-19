@@ -1,8 +1,8 @@
 
 const knex = require('knex')
 const { PORT, DB_URL } = require('./config')
-const db = () => knex({
+const db = (url = DB_URL) => knex({    
     client: 'pg',
-    connection: DB_URL
+    connection: url
 })
 module.exports = db;

@@ -178,7 +178,7 @@ const collections = JSON.stringify({
   projects,
   contractors_projects,
   roles,
-  statuses
+  project_statuses: statuses,
 }, 2, 2);
 
 // console.log(collections);

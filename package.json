@@ -7,6 +7,7 @@
     "test": "mocha --require test/setup.js",
     "dev": "nodemon src/server.js",
     "migrate-production": "postgrator --config postgrator-production-config.js",
+    "migrate-test": "postgrator --config postgrator-test-config.js",
     "migrate": "postgrator --config postgrator-config.js",
     "start": "node src/server.js",
     "predeploy": "npm audit && npm run migrate-production",
@@ -29,6 +30,7 @@
     "knex": "^0.17.6",
     "morgan": "^1.9.1",
     "pg": "^7.11.0",
+    "pg-connection-string": "^2.1.0",
     "postgrator": "^3.10.2",
     "winston": "^3.2.1"
   },
