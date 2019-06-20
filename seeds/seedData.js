@@ -49,7 +49,7 @@ const seedData = async (data, knex) => {
         })
         .catch(handleError)
 
-    if (!data.contractors_projects) { //if thins is a flatted structure 
+    if (!data.contractors_projects) { //if this is a flatted structure with related records
 
 
         let contractorRecords = data.projects.reduce(
