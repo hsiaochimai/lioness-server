@@ -46,8 +46,9 @@ const populateProjectRelatedRecords = async (project, knex) => {
   const contractorsP = contractorsQuery.then(users => {
     project.contractors = users
   })
+  
   promises.push(contractorsP)
-
+//return the array promises
   return Promise.all(promises)
 
 }
