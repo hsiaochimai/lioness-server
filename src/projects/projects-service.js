@@ -1,4 +1,57 @@
 
+const populateProjectRelatedRecords = async (project, knex) => {
+
+  const promises = []
+
+  //populate status object
+  const statusQuery = knex('project_statuses').select('*')
+    .where('id', project.status_id)
+    .first()
+  // console.log(statusQuery.toString())
+  const statusP = statusQuery.then(res => {
+    project.status = res
+  })
+  promises.push(statusP)
+
+  //populate client object
+  const clientQuery = knex('users').select('*')
+    .where('id', project.client_id)
+    .first()
+  // console.log(clientQuery.toString())
+  const clientP = clientQuery.then(user => {
+    project.client = user
+  })
+  promises.push(clientP)
+
+  //populate manager object  
+  const managerQuery = knex('users').select('*')
+    .where('id', project.manager_id)
+    .first()
+  // console.log(managerQuery.toString())
+  const managerP = managerQuery.then(user => {
+    project.manager = user
+  })
+  promises.push(managerP)
+
+  //populate contractors object
+  const contractorsQuery = knex('users').select('*')
+    // .where('project_id', id)
+    .innerJoin('contractors_projects', function () {
+      this.on('users.id', '=', 'contractors_projects.contractor_id')
+        .andOn('contractors_projects.project_id', '=', project.id)
+    })
+
+  // console.log(contractorsQuery.toString())
+
+  const contractorsP = contractorsQuery.then(users => {
+    project.contractors = users
+  })
+  promises.push(contractorsP)
+
+  return Promise.all(promises)
+
+}
+
 
 const ProjectsService = {
   upsertProject: async (knex, project, contractorIDs) => {
@@ -42,7 +95,7 @@ const ProjectsService = {
     await knex('contractors_projects')
       .insert(contractorRecords)
       .then(() => {
-        console.log(`added contractors for ${id} ${contractorIDs.join(', ')}`)
+        console.log(`added contractors for ID ${id}: ${contractorIDs.join(', ')}`)
       })
 
     return id
@@ -86,54 +139,9 @@ const ProjectsService = {
     //populate related records
     let promises = []
 
-    result.forEach(project => {
-      const statusQuery = knex('project_statuses').select('*')
-        .where('id', project.status_id)
-        .first()
-      // console.log(statusQuery.toString())
-      const p = statusQuery.then(res => {
-        project.status = res
-      })
-      promises.push(p)
-    })
-
-    result.forEach(project => {
-      const clientQuery = knex('users').select('*')
-        .where('id', project.client_id)
-        .first()
-      // console.log(clientQuery.toString())
-      const p = clientQuery.then(user => {
-        project.client = user
-      })
-      promises.push(p)
-    })
-
-    result.forEach(project => {
-      const managerQuery = knex('users').select('*')
-        .where('id', project.manager_id)
-        .first()
-      // console.log(managerQuery.toString())
-      const p = managerQuery.then(user => {
-        project.manager = user
-      })
-      promises.push(p)
-    })
-
-    result.forEach(project => {
-      const contractorsQuery = knex('users').select('*')
-        // .where('project_id', id)
-        .innerJoin('contractors_projects', function () {
-          this.on('users.id', '=', 'contractors_projects.contractor_id')
-            .andOn('contractors_projects.project_id', '=', project.id)
-        })
-
-      // console.log(contractorsQuery.toString())
-
-      const p = contractorsQuery.then(users => {
-        project.contractors = users
-      })
-      promises.push(p)
-    })
+    result.forEach(
+      project => promises.push(populateProjectRelatedRecords(project, knex))
+    )
 
     await Promise.all(promises)
     return {
