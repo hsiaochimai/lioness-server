@@ -90,7 +90,8 @@ const seedData = async (data, knex) => {
                 .catch(handleError)
     }
 
-    // update sequences
+    // update sequences, otherwise INSERT would cause duplicate pkey errors 
+    // because the generated ids are already taken
     await knex.raw(`
     SELECT setval('projects_id_seq', max(id))
     FROM  projects
