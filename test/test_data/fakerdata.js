@@ -49,16 +49,44 @@ for (let i = 0; i < 2; i++) {
     //associated objects
     role: adminRole, //the role Object corresponding to the role_id
     // isAdmin: true,
-    projects: []
+    // projects: []
   };
   users.push(admin);
 }
+const CLIENT_ROLE = 2
+const CONTRACTOR_ROLE = 3
+const MANAGER_ROLE = 4
 
-for (let i = 2; i < 6; i++) {
-  const remainingRoles = [...roles];
-  remainingRoles.shift();
-  const randomRole =
-    remainingRoles[Math.floor(Math.random() * remainingRoles.length)];
+const usersByRole = {
+  [CLIENT_ROLE]: [],
+  [CONTRACTOR_ROLE]: [],
+  [MANAGER_ROLE]: [],
+}
+
+const remainingRoles = [...roles];
+remainingRoles.shift();
+for (let i = 2; true; i++) {
+  // const roleID =
+  //   remainingRoles[Math.floor(Math.random() * remainingRoles.length)];
+  let roleID
+  let done = true;
+  if (usersByRole[CLIENT_ROLE].length < 3) {
+    roleID = CLIENT_ROLE
+    done = false
+  }
+  if (usersByRole[MANAGER_ROLE].length < 3) {
+    roleID = MANAGER_ROLE
+    done = false
+  }
+  if (usersByRole[CONTRACTOR_ROLE].length < 6) {
+    roleID = CONTRACTOR_ROLE
+    done = false
+  }
+  if (done) {
+    console.log('Generated users')
+    break;
+  }
+
   const user = {
     //fields
     // id: faker.random.uuid(),
@@ -67,25 +95,27 @@ for (let i = 2; i < 6; i++) {
     full_name: faker.name.findName(),
     phone: faker.phone.phoneNumberFormat(),
     password: faker.internet.password(),
-    role_id: randomRole.id,
+    role_id: roleID,
     // isAdmin: false,
     //associated objects
-    role: randomRole, //the role Object corresponding to the role_id
+    // role: roles.find(i => i.id === roleID), //the role Object corresponding to the role_id
     // projects: []
-    projects: []
+    // projects: []
   };
   users.push(user);
+  usersByRole[roleID].push(user)
 }
 const clients = users.filter(user => {
-  return user.role.id === 2;
+  return user.role_id === CLIENT_ROLE;
 });
 const contractors = users.filter(user => {
-  return user.role.id === 3;
+  return user.role_id === CONTRACTOR_ROLE;
 });
 const projectManagers = users.filter(user => {
-  return user.role.id === 4;
+  return user.role_id === MANAGER_ROLE;
 });
 const projects = [];
+const contractors_projects = [];
 for (let i = 0; i < 30; i++) {
   let contractorsArr = [
     contractors[Math.floor(Math.random() * contractors.length)]
@@ -120,10 +150,10 @@ for (let i = 0; i < 30; i++) {
     status_id: projectStatus.id,
     manager_id: manager.id,
     //associated objects
-    status: projectStatus,
-    client: client, //relation based on client_id
-    contractors: contractorsArr,
-    manager: manager
+    // status: projectStatus,
+    // client: client, //relation based on client_id
+    // contractors: contractorsArr,
+    // manager: manager
   };
   // contractorsArr.filter((i, index, arr) => {
   //   const existing = arr.findIndex(e => e.id === i.id)
@@ -133,24 +163,26 @@ for (let i = 0; i < 30; i++) {
   //   }
   // })
 
-  contractorsArr.forEach(c => c.projects.push(project))
+  // contractorsArr.forEach(c => c.projects.push(project))
+  // client.projects.push(project);  
+  // manager.projects.push(project);
+  contractorsArr.forEach(c => contractors_projects.push({ contractor_id: c.id, project_id: project.id }))
 
-  client.projects.push(project);
-  manager.projects.push(project);
-  users.projects = [project];
+  // users.projects = [project];
   projects.push(project);
 
 }
 
-const collections = stringify({
+const collections = JSON.stringify({
   users,
   projects,
+  contractors_projects,
   roles,
-  statuses
-});
+  project_statuses: statuses,
+}, 2, 2);
 
 // console.log(collections);
-fs.writeFile('./flattenedData.json', collections, (err) => {
+fs.writeFile('./fixturesData.json', collections, (err) => {
   // throws an error, you could also catch it here
   if (err) throw err;
 

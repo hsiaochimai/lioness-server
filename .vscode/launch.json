@@ -4,12 +4,20 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        // {
+        //     "type": "node",
+        //     "request": "launch",
+        //     "name": "Launch Program",
+        //     "program": "${workspaceFolder}/app.js"
+        // }
 
         {
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/home/tudor/.nvm/versions/node/v10.15.0/bin/node",
+            // "runtimeExecutable": "/home/tudor/.nvm/versions/node/v10.15.0/bin/node",
+            "runtimeVersion":"10.15.0", //use nvm
             "name": "Launch Program",
+            // "program": "${workspaceFolder}/test/test_data/fakerdata.js"
             "program": "${workspaceFolder}/src/server.js"
         }
     ]
