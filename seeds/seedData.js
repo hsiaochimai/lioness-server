@@ -96,7 +96,7 @@ const seedData = async (data, knex) => {
     FROM  projects
     `)
         .then(res => {
-            console.log('sequences updated', res.rowCount)
+            console.log('projects sequence updated', res.rowCount)
         })
         .catch(handleError)
     await knex.raw(`
@@ -104,7 +104,7 @@ const seedData = async (data, knex) => {
         FROM users
         `)
         .then(res => {
-            console.log('sequences updated', res.rowCount)
+            console.log('users sequence updated', res.rowCount)
         })
         .catch(handleError)
 
