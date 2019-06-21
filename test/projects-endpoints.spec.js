@@ -35,6 +35,7 @@ describe("Projects Endpoints", function () {
     context(`Given no projects`, () => {
       it(`responds with 200 and an empty list`, async () => {
         await clearData(db)
+        await populateDB(db)
         return supertest(app)
           .get("/api/projects")
           .set("Authorization", `Bearer ${API_TOKEN}`)
