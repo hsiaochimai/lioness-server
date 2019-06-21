@@ -5,6 +5,10 @@ const CLIENT_ROLE = 2
 const CONTRACTOR_ROLE = 3
 const MANAGER_ROLE = 4
 
+const SORT_ASC = 'ASC'
+const SORT_DESC = 'DESC'
+const ITEMS_PER_PAGE = 10
+
 module.exports = {
   PORT: process.env.PORT || 8000,
   NODE_ENV: process.env.NODE_ENV || 'development',
@@ -16,4 +20,9 @@ module.exports = {
     CONTRACTOR_ROLE,
     MANAGER_ROLE,
   },
+  FETCH_INFO: {
+    SORT_ASC,
+    SORT_DESC,
+    ITEMS_PER_PAGE,
+  }
 }

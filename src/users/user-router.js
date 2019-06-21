@@ -1,14 +1,13 @@
 const express = require("express");
 const UsersService=require('./users-service')
 const usersRouter= express.Router();
-const SORT_ASC = 'ASC'
-const SORT_DESC = 'DESC'
-const ITEMS_PER_PAGE = 10
+const {FETCH_INFO:{SORT_ASC, SORT_DESC, ITEMS_PER_PAGE}} = require('../config')
 
 const usersDefaultOptions = {
     idsFilter: null, // pass a non-empty array to fetch users by theirs ids
     searchQuery: null,
     userNameSort: SORT_ASC,
+    activeProjSort:null,
     roleFilter: null,
     pageNumber: 1,
 }
