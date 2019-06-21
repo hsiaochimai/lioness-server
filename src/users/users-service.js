@@ -1,3 +1,7 @@
+const {
+  FETCH_INFO: { SORT_ASC, SORT_DESC, ITEMS_PER_PAGE },
+  ROLES: { ADMIN_ROLE, CLIENT_ROLE, MANAGER_ROLE, CONTRACTOR_ROLE } } = require('../config')
+  
 const populateUserProjects = async (user, knex) => {
   const promises = [];
   const roleQuery = knex("roles")
@@ -8,58 +12,63 @@ const populateUserProjects = async (user, knex) => {
     user.role = res;
   });
   promises.push(roleObj);
-  
+
+  //this will either be client projects or user projects
+  user.projects = []
+
   //populate client projects
-  const clientProjectsQuery = knex("projects")
-    .select("*")
-    .where('client_id', user.id)
-    
-    
-    
-  
-  const clientProjectArr = clientProjectsQuery.then(project => {
-    user.projects = project;
-  });
-  promises.push(clientProjectArr);
-console.log(`this is promises with client projects`, promises)
-  const managerProjectsQuery = knex("projects")
-    .select("*")
-    .where('manager_id', user.id)
-
-  
-
-  const managerProjectArr = managerProjectsQuery.then(projects => {
-    user.projects = projects;
-  });
-  promises.push(managerProjectArr);
-
-  const contractorsProjectsQuery = knex("projects")
-    .select("*")
-    // .where('project_id', id)
-    .innerJoin("contractors_projects", function() {
-      this.on("projects.id", "=", "contractors_projects.project_id").andOn(
-        "contractors_projects.contractor_id",
-        "=",
-        user.id
-      );
+  if (user.role_id === CLIENT_ROLE) {
+    const clientProjectsQuery = knex("projects")
+      .select("*")
+      .where('client_id', user.id)
+    const clientProjectPromise = clientProjectsQuery.then(project => {
+      console.log(`Got ${project.length} client projects for user ${user.id}`)
+      user.projects = project;
     });
+    promises.push(clientProjectPromise);
+  }
+
+  if (user.role_id === MANAGER_ROLE) {
+    const managerProjectsQuery = knex("projects")
+      .select("*")
+      .where('manager_id', user.id)
+
+    const managerProjectPromise = managerProjectsQuery.then(projects => {
+      user.projects = projects;
+      console.log(`Got ${projects.length} manager projects for user ${user.id}`)
+    }
+    );
+    promises.push(managerProjectPromise);
+  }
+  if (user.role_id === CONTRACTOR_ROLE) {
+    const contractorsProjectsQuery = knex("projects")
+      .select("*")
+      // .where('project_id', id)
+      .innerJoin("contractors_projects", function () {
+        this.on("projects.id", "=", "contractors_projects.project_id").andOn(
+          "contractors_projects.contractor_id",
+          "=",
+          user.id
+        );
+      });
     console.log(`hello contractors!`, contractorsProjectsQuery.toString())
 
-  // console.log(contractorsQuery.toString())
+    // console.log(contractorsQuery.toString())
 
-  const contractorsProjectsArr = contractorsProjectsQuery.then(projects => {
-    user.projects = projects;
-  });
+    const contractorsProjectsPromise = contractorsProjectsQuery.then(projects => {
+      console.log(`Got ${projects.length} contractor projects for user ${user.id}`)
+      user.projects = projects;
+    });
 
-  promises.push(contractorsProjectsArr);
-return Promise.all(promises)
+    promises.push(contractorsProjectsPromise);
+  }
+  return Promise.all(promises)
 };
 
 const UsersService = {
   getUsers: async (knex, mergedOpts) => {
     const users = knex("users");
     const counter = knex("users");
-    const ITEMS_PER_PAGE = 10;
 
     if (mergedOpts.roleFilter) {
       users.where("role_id", mergedOpts.roleFilter);
@@ -81,11 +90,11 @@ const UsersService = {
     await users.select("*").then(data => {
       result = data;
     })
-let promises=[]
-result.forEach(
-    user=>promises.push(populateUserProjects(user, knex))
-)
-await Promise.all(promises)
+    let promises = []
+    result.forEach(
+      user => promises.push(populateUserProjects(user, knex))
+    )
+    await Promise.all(promises)
     return {
       data: result,
       numPages,

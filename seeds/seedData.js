@@ -56,6 +56,7 @@ const seedData = async (data, knex) => {
             (acc, project) => {
                 project.contractors.forEach(c => {
                     acc.push({ project_id: project.id, contractor_id: c.id })
+                    console.log(acc[acc.length - 1])
                 })
                 return acc
             }, [])

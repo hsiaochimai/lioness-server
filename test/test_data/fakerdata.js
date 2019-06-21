@@ -1,6 +1,7 @@
 // https://www.npmjs.com/package/faker
 // this generates data flattenedData.json
 const faker = require("faker");
+const { ROLES: { ADMIN_ROLE, CLIENT_ROLE, MANAGER_ROLE, CONTRACTOR_ROLE } } = require('../../src/config')
 const fs = require('fs')
 faker.seed(123);
 const { parse, stringify } = require("flatted/cjs");
@@ -23,10 +24,10 @@ function uniqueRecord(fn, arr, objKey) {
 }
 
 const roles = [
-  { id: 1, title: "Admin" },
-  { id: 2, title: "Client" },
-  { id: 3, title: "Contractor" },
-  { id: 4, title: "Project Manager" }
+  { id: ADMIN_ROLE, title: "Admin" },
+  { id: CLIENT_ROLE, title: "Client" },
+  { id: CONTRACTOR_ROLE, title: "Contractor" },
+  { id: MANAGER_ROLE, title: "Project Manager" }
 ];
 const statuses = [
   { id: 1, title: "estimate" },
@@ -53,9 +54,7 @@ for (let i = 0; i < 2; i++) {
   };
   users.push(admin);
 }
-const CLIENT_ROLE = 2
-const CONTRACTOR_ROLE = 3
-const MANAGER_ROLE = 4
+
 
 const usersByRole = {
   [CLIENT_ROLE]: [],
@@ -178,7 +177,8 @@ const collections = JSON.stringify({
   projects,
   contractors_projects,
   roles,
-  project_statuses: statuses,
+  // project_statuses: statuses,
+  statuses,
 }, 2, 2);
 
 // console.log(collections);
