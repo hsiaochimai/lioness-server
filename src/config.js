@@ -5,6 +5,8 @@ const CLIENT_ROLE = 2
 const CONTRACTOR_ROLE = 3
 const MANAGER_ROLE = 4
 
+//TODO add statuses
+
 const SORT_ASC = 'ASC'
 const SORT_DESC = 'DESC'
 const ITEMS_PER_PAGE = 10
