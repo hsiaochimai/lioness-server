@@ -9,20 +9,24 @@ const populateUserProjects = async (user, knex) => {
   });
   promises.push(roleObj);
   
-  
+  //populate client projects
   const clientProjectsQuery = knex("projects")
     .select("*")
     .where('client_id', user.id)
-  const clientProjectArr = clientProjectsQuery.then(projects => {
-    user.projects = projects;
+    
+    
+    
+  
+  const clientProjectArr = clientProjectsQuery.then(project => {
+    user.projects = project;
   });
   promises.push(clientProjectArr);
-
+console.log(`this is promises with client projects`, promises)
   const managerProjectsQuery = knex("projects")
     .select("*")
     .where('manager_id', user.id)
-    .then();
 
+  
 
   const managerProjectArr = managerProjectsQuery.then(projects => {
     user.projects = projects;
@@ -39,6 +43,7 @@ const populateUserProjects = async (user, knex) => {
         user.id
       );
     });
+    console.log(`hello contractors!`, contractorsProjectsQuery.toString())
 
   // console.log(contractorsQuery.toString())
 
