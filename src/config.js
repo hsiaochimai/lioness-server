@@ -11,6 +11,17 @@ const SORT_ASC = 'ASC'
 const SORT_DESC = 'DESC'
 const ITEMS_PER_PAGE = 10
 
+const projectsDefaultOptions = {
+  statusFilter: null,
+  searchQuery: null,
+  budgetSort: SORT_ASC,
+  dateTypeFilter: null,
+  dateSort: null,
+  afterDate: null,
+  beforeDate: null,
+  roleFilter: null,
+  pageNumber: 1,
+}
 module.exports = {
   PORT: process.env.PORT || 8000,
   NODE_ENV: process.env.NODE_ENV || 'development',
@@ -26,5 +37,6 @@ module.exports = {
     SORT_ASC,
     SORT_DESC,
     ITEMS_PER_PAGE,
-  }
+  },
+  projectsDefaultOptions
 }
