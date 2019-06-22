@@ -21,6 +21,14 @@ const projectsDefaultOptions = {
   roleFilter: null,
   pageNumber: 1,
 }
+const usersDefaultOptions = {
+  idsFilter: null, // pass a non-empty array to fetch users by theirs ids
+  searchQuery: null,
+  userNameSort: SORT_ASC,
+  activeProjSort:null,
+  roleFilter: null,
+  pageNumber: 1,
+}
 module.exports = {
   PORT: process.env.PORT || 8000,
   NODE_ENV: process.env.NODE_ENV || 'development',
@@ -37,5 +45,6 @@ module.exports = {
     SORT_DESC,
     ITEMS_PER_PAGE,
   },
-  projectsDefaultOptions
+  projectsDefaultOptions,
+  usersDefaultOptions
 }
