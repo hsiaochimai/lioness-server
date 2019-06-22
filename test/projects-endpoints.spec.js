@@ -83,7 +83,7 @@ describe("Projects Endpoints", function() {
 
         let opts = { ...projectsDefaultOptions, budgetSort: SORT_ASC };
         const qs = queryString.stringify(opts);
-        const serviceResult = await ProjectService.getProjects(db, opts);
+        await ProjectService.getProjects(db, opts);
 
         return (
           supertest(app)
@@ -96,6 +96,30 @@ describe("Projects Endpoints", function() {
               data.forEach((i, index) => {
                 if (index < data.length - 2) {
                   expect(data[index].budget < data[index + 1].budget).to.be.true;
+                }
+              });
+              //filter .forEach
+            })
+        );
+      });
+      it("GET /api/projects responds with 200 and filters by status filter", async () => {
+        await populateDB(db);
+
+        let opts = { ...projectsDefaultOptions, statusFilter:1 };
+        const qs = queryString.stringify(opts);
+        await ProjectService.getProjects(db, opts);
+
+        return (
+          supertest(app)
+            .get(`/api/projects/?${qs}`)
+            // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
+            .expect(200)
+            .then(response => {
+              const { data } = response.body;
+              //sort function
+              data.forEach((i, index) => {
+                if (index < data.length - 2) {
+                  expect(data[index].status_id === 1).to.be.true;
                 }
               });
               //filter .forEach

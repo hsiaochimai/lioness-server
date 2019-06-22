@@ -13,7 +13,6 @@ const ITEMS_PER_PAGE = 10
 
 const projectsDefaultOptions = {
   statusFilter: null,
-  searchQuery: null,
   budgetSort: SORT_ASC,
   dateTypeFilter: null,
   dateSort: null,
