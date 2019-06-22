@@ -103,6 +103,7 @@ describe("Projects Endpoints", function() {
         );
       });
       //have to change dates from strings back to dates
+      //Could we make the date type filter more dynamic in the test?
       it("GET /api/projects responds with 200 and filters by date type and sorts", async () => {
         await populateDB(db);
 
@@ -119,10 +120,9 @@ describe("Projects Endpoints", function() {
               const { data } = response.body;
               console.log(`this is the length`,data.length)
               data.forEach((i, index) => {
-                if (index < data.length -2) {
-                  //took out .to.be. true and the test passes
-                      expect(new Date(data[index].start_date) < new Date(data[index + 1].start_date)).to.be.true;
-                    }
+                if (index < data.length -2){
+                expect(new Date(data[index].start_date)<= new Date(data[index + 1].start_date)).to.be.true;
+              }
                 
               })
               
