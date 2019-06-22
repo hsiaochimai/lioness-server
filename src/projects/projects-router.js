@@ -1,4 +1,5 @@
 // const path = require("path");
+require('json.date-extensions');
 const express = require("express");
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
@@ -17,8 +18,7 @@ const STATUS_OTHER = 4
 
 const projectsDefaultOptions = {
   statusFilter: null,
-  searchQuery: null,
-  budgetSort: SORT_ASC,
+  budgetSort: SORT_DESC,
   dateTypeFilter: null,
   dateSort: null,
   afterDate: null,
@@ -42,7 +42,9 @@ projectsRouter
     const knex = req.app.get("db");
     const mergedOpts = { ...projectsDefaultOptions, ...req.query }
     const result = await ProjectsService.getProjects(knex, mergedOpts)
-    res.json(result);
+     res.json(result)
+    
+
   });
 
 module.exports = projectsRouter;

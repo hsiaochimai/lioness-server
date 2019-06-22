@@ -12,7 +12,7 @@ const { clearData } = require("../seeds/seedData");
 const { TEST_DB_URL } = require("../src/config");
 const { API_TOKEN } = process.env;
 const ProjectService = require("../src/projects/projects-service");
-const { expect } = require("chai");
+const { expect, assert } = require("chai");
 let db;
 describe("Projects Endpoints", function() {
   before(() => {
@@ -53,31 +53,7 @@ describe("Projects Endpoints", function() {
       // const testRoles = fixturesData.roles;
       // const testProjects = fixturesData.projects
       // const testContractorProjects = fixturesData.contractor_projects
-
-      it("GET /api/projects responds with 200 and sorts by budget ASC", async () => {
-        await populateDB(db);
-
-        let opts = { ...projectsDefaultOptions, budgetSort: SORT_ASC };
-        const qs = queryString.stringify(opts);
-        const serviceResult = await ProjectService.getProjects(db, opts);
-
-        return (
-          supertest(app)
-            .get(`/api/projects/?${qs}`)
-            // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
-            .expect(200)
-            .then(response => {
-              const { data } = response.body;
-              //sort function
-              data.forEach((i, index) => {
-                if (index < data.length - 2) {
-                  expect(data[index].budget < data[index + 1].budget).to.be.true;
-                }
-              });
-              //filter .forEach
-            })
-        );
-      });
+    
       it("GET /api/projects responds with 200 and sorts by budget ASC", async () => {
         await populateDB(db);
 
@@ -122,6 +98,37 @@ describe("Projects Endpoints", function() {
                   expect(data[index].status_id === 1).to.be.true;
                 }
               });
+              //filter .forEach
+            })
+        );
+      });
+      //have to change dates from strings back to dates
+      it("GET /api/projects responds with 200 and filters by date type and sorts", async () => {
+        await populateDB(db);
+
+        let opts = { ...projectsDefaultOptions, dateTypeFilter:'start_date', dateSort: SORT_ASC, budgetSort: null };
+        const qs = queryString.stringify(opts);
+        await ProjectService.getProjects(db, opts);
+
+        return (
+          supertest(app)
+            .get(`/api/projects/?${qs}`)
+            // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
+            .expect(200)
+            .then(response => {
+              const { data } = response.body;
+              console.log(`this is the length`,data.length)
+              data.forEach((i, index) => {
+                if (index < data.length -2) {
+                  //took out .to.be. true and the test passes
+                      expect(new Date(data[index].start_date) < new Date(data[index + 1].start_date)).to.be.true;
+                    }
+                
+              })
+              
+    
+              // sort function
+            
               //filter .forEach
             })
         );

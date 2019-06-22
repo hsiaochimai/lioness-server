@@ -23,6 +23,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "chai": "^4.2.0",
+    "chai-datetime": "^1.5.0",
     "cors": "^2.8.5",
     "dayjs": "^1.8.14",
     "dotenv": "^7.0.0",
@@ -30,6 +31,7 @@
     "faker": "^4.1.0",
     "flatted": "^2.0.0",
     "helmet": "^3.16.0",
+    "json.date-extensions": "^1.2.2",
     "knex": "^0.17.6",
     "morgan": "^1.9.1",
     "pg": "^7.11.0",
