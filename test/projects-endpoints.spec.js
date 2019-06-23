@@ -277,6 +277,28 @@ describe("Projects Endpoints", function () {
             })
         );
       });
+      it("Deletes a project", async () => {
+        await populateDB(db);
+        const idToRemove=2;
+        // const expectedProjects= ProjectService.getProjects(db).then(response=>{
+        //   const {data}=response.body;
+        //   data.filter(project=> project.id!==idToRemove)
+        // })
+        return supertest(app)
+            .delete(`/api/projects/id/${idToRemove}`)
+            // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
+            .expect(204)
+            .then(
+              supertest(app)
+              .get(`/api/projects/id/${idToRemove}`)
+              .expect(404)
+              // .then(response=>{
+              //   const {data}=response.body;
+              //   data.filter(project=> project.id!==idToRemove)
+              // })
+              )
+         
+      });
     });
   });
   describe(`POST/api/project/create`, async () => {

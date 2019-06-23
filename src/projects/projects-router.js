@@ -44,7 +44,16 @@ projectsRouter
     const result = await ProjectsService.getProjectByID(knex, req.params.id)
     res.json(result)
   }))
-
+  .delete(expressTryCatchWrapper(async(req, res, next) => {
+    const knex = req.app.get("db");
+    await ProjectsService.deleteProject(knex, req.params.id)
+      .then(() => {
+        res.status(204)
+        .end()
+        
+      })
+      .catch(next);
+  }))
 projectsRouter
   .route('/')
   .get(expressTryCatchWrapper(async (req, res) => {
