@@ -5,6 +5,11 @@ const CLIENT_ROLE = 2
 const CONTRACTOR_ROLE = 3
 const MANAGER_ROLE = 4
 
+const STATUS_ESTIMATE = 1
+const STATUS_IN_PROGRESS = 2
+const STATUS_BILLED = 3
+const STATUS_OTHER = 4
+
 //TODO add statuses
 
 const SORT_ASC = 'ASC'
@@ -25,7 +30,7 @@ const usersDefaultOptions = {
   idsFilter: null, // pass a non-empty array to fetch users by theirs ids
   searchQuery: null,
   userNameSort: SORT_ASC,
-  activeProjSort:null,
+  activeProjSort: null,
   roleFilter: null,
   pageNumber: 1,
 }
@@ -40,6 +45,13 @@ module.exports = {
     CONTRACTOR_ROLE,
     MANAGER_ROLE,
   },
+  PROJECT_STATUESES: {
+    STATUS_ESTIMATE,
+    STATUS_IN_PROGRESS,
+    STATUS_BILLED,
+    STATUS_OTHER
+  },
+
   FETCH_INFO: {
     SORT_ASC,
     SORT_DESC,
