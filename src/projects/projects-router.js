@@ -31,10 +31,18 @@ const projectsDefaultOptions = {
 projectsRouter
   .route('/create')
   .post(jsonParser, expressTryCatchWrapper(async (req, res) => {
-    const { project, contractorIDs } = req.body
     const knex = req.app.get("db");
+    const { project, contractorIDs } = req.body
     const savedProject = await ProjectsService.upsertProject(knex, project, contractorIDs)
     res.json(savedProject);
+  }))
+
+projectsRouter
+  .route('/id/:id')
+  .get(expressTryCatchWrapper(async (req, res) => {
+    const knex = req.app.get("db");
+    const result = await ProjectsService.getProjectByID(knex, req.params.id)
+    res.json(result)
   }))
 
 projectsRouter

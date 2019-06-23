@@ -38,7 +38,7 @@ const populateProjectRelatedRecords = async (project, knex) => {
   const contractorsQuery = knex("users")
     .select("*")
     // .where('project_id', id)
-    .innerJoin("contractors_projects", function() {
+    .innerJoin("contractors_projects", function () {
       this.on("users.id", "=", "contractors_projects.contractor_id").andOn(
         "contractors_projects.project_id",
         "=",
@@ -58,6 +58,14 @@ const populateProjectRelatedRecords = async (project, knex) => {
 };
 
 const ProjectsService = {
+  getProjectByID: async (knex, id) => {
+    const project = await knex("projects")
+      .where('id', '=', id)
+      .first()
+    await populateProjectRelatedRecords(project, knex)
+    return project
+  },
+
   upsertProject: async (knex, project, contractorIDs) => {
     // nullify empty values
     Object.keys(project).forEach(k => {
@@ -111,7 +119,7 @@ const ProjectsService = {
         );
       });
 
-    return id;
+    return ProjectsService.getProjectByID(knex, id);
   },
 
   getProjects: async (knex, mergedOpts) => {
@@ -126,11 +134,11 @@ const ProjectsService = {
     if (mergedOpts.beforeDate) {
       projects.where(mergedOpts.dateTypeFilter, '<', mergedOpts.beforeDate)
       counter.where(mergedOpts.dateTypeFilter, '<', mergedOpts.beforeDate)
-  }
-  if (mergedOpts.afterDate) {
-    projects.where(mergedOpts.dateTypeFilter, '>', mergedOpts.afterDate)
-    counter.where(mergedOpts.dateTypeFilter, '>', mergedOpts.afterDate)
-  }
+    }
+    if (mergedOpts.afterDate) {
+      projects.where(mergedOpts.dateTypeFilter, '>', mergedOpts.afterDate)
+      counter.where(mergedOpts.dateTypeFilter, '>', mergedOpts.afterDate)
+    }
     //count before paginating
 
     let totalItemCount = +(await counter.count("id"))[0].count;
@@ -143,7 +151,7 @@ const ProjectsService = {
     if (mergedOpts.dateSort) {
       projects.orderBy(mergedOpts.dateTypeFilter, mergedOpts.dateSort);
     }
-  
+
     const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE;
     projects.offset(begin);
     projects.limit(ITEMS_PER_PAGE);

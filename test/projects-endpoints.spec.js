@@ -72,6 +72,41 @@ describe("Projects Endpoints", function () {
       // const testProjects = fixturesData.projects
       // const testContractorProjects = fixturesData.contractor_projects
 
+      it("Updates a project", async () => {
+        await populateDB(db);
+        let { status, client, manager, contractors, ...project } = await ProjectService.getProjectByID(db, 1)
+        project.title = 'The Zoo'
+        project.budget = 0.5
+        project.description = 'TL;DR'
+
+        const contractorIDs = contractors.map(c => c.id)
+        const body = {
+          project,
+          contractorIDs,
+        }
+
+        return supertest(app)
+          .post(`/api/projects/create`)
+          .send(body)
+          .set('Accept', /application\/json/)
+          .expect(200)
+          .then(r => JSON.parse(r.text))
+          .then(async res => {
+            // const res = await ProjectService.getProjectByID(db, 1)
+            'title description budget start_date estimated_due_date completion_date client_id status_id manager_id'
+              .split(' ')
+              .forEach(fieldName => {
+                let v = res[fieldName]
+                let v2 = project[fieldName]
+                if (/_date$/.test(fieldName)) {
+                  v = new Date(v).toLocaleDateString()
+                  v2 = new Date(v2).toLocaleDateString()
+                }
+                expect(v).to.equal(v2)
+              })
+          })
+      })
+
       it("GET /api/projects responds with 200 and sorts by budget ASC", async () => {
         await populateDB(db);
 
@@ -82,7 +117,6 @@ describe("Projects Endpoints", function () {
         return (
           supertest(app)
             .get(`/api/projects/?${qs}`)
-            // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
             .expect(200)
             .then(response => {
               const { data } = response.body;
