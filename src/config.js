@@ -31,6 +31,7 @@ const usersDefaultOptions = {
   searchQuery: null,
   userNameSort: SORT_ASC,
   activeProjSort: null,
+  inactive: false,
   roleFilter: null,
   pageNumber: 1,
 }

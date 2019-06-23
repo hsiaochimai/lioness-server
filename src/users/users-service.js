@@ -111,12 +111,17 @@ const UsersService = {
       users.where("role_id", mergedOpts.roleFilter);
       counter.where("role_id", mergedOpts.roleFilter);
     }
+    if(mergedOpts.inactive===false){
+      users.where("inactive", false)
+      counter.where("inactive", false)
+    }
     let totalItemCount = +(await counter.count("id"))[0].count;
     const numPages = Math.ceil(totalItemCount / ITEMS_PER_PAGE);
 
     if (mergedOpts.userNameSort) {
       users.orderBy("full_name", mergedOpts.userNameSort);
     }
+    
     const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE;
     users.offset(begin);
     users.limit(ITEMS_PER_PAGE);
