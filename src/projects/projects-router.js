@@ -6,6 +6,7 @@ const jsonParser = bodyParser.json();
 // const xss = require("xss");
 const ProjectsService = require("./projects-service");
 const projectsRouter = express.Router();
+const { expressTryCatchWrapper } = require('../helpers')
 // const jsonParser = express.json();
 const SORT_ASC = 'ASC'
 const SORT_DESC = 'DESC'
@@ -29,22 +30,20 @@ const projectsDefaultOptions = {
 
 projectsRouter
   .route('/create')
-  .post(jsonParser, async (req, res) => {
+  .post(jsonParser, expressTryCatchWrapper(async (req, res) => {
     const { project, contractorIDs } = req.body
     const knex = req.app.get("db");
     const savedProject = await ProjectsService.upsertProject(knex, project, contractorIDs)
     res.json(savedProject);
-  })
+  }))
 
 projectsRouter
   .route('/')
-  .get(async (req, res) => {
+  .get(expressTryCatchWrapper(async (req, res) => {
     const knex = req.app.get("db");
     const mergedOpts = { ...projectsDefaultOptions, ...req.query }
     const result = await ProjectsService.getProjects(knex, mergedOpts)
-     res.json(result)
-    
-
-  });
+    res.json(result)
+  }));
 
 module.exports = projectsRouter;
