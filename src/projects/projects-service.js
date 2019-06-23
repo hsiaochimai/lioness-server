@@ -1,3 +1,5 @@
+const { convertDatesToTimestamps, timestampsToDates } = require('../helpers')
+
 const populateProjectRelatedRecords = async (project, knex) => {
   const promises = [];
 
@@ -63,6 +65,7 @@ const ProjectsService = {
       .where('id', '=', id)
       .first()
     await populateProjectRelatedRecords(project, knex)
+    convertDatesToTimestamps(project)
     return project
   },
 
@@ -77,6 +80,8 @@ const ProjectsService = {
     let { id } = project;
     const isNew = id === -1;
     delete project.id;
+    timestampsToDates(project)
+    
 
     if (isNew) {
       console.log(
@@ -169,6 +174,10 @@ const ProjectsService = {
     result.forEach(project =>
       promises.push(populateProjectRelatedRecords(project, knex))
     );
+
+    result.forEach(project => {
+      convertDatesToTimestamps(project)
+    })
 
     await Promise.all(promises);
     return {

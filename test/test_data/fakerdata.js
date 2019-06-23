@@ -132,9 +132,17 @@ for (let i = 0; i < 30; i++) {
     projectManagers[Math.floor(Math.random() * projectManagers.length)];
 
   const projectStatus = statuses[Math.floor(Math.random() * statuses.length)];
-  const beginDate = faker.date.recent(60);
-  const estimatedDate = faker.date.between(beginDate, faker.date.recent());
-  const billedDate = faker.date.between(estimatedDate, faker.date.recent());
+  // const beginDate = +parseInt(faker.date.recent(60).getTime()
+  //   / 1000)
+  // const estimatedDate = +parseInt(faker.date.between(new Date(+beginDate), faker.date.recent()).getTime()
+  //   / 1000)
+  // const billedDate = +parseInt(faker.date.between(new Date(+estimatedDate), faker.date.recent()).getTime()
+  //   / 1000)
+
+  const beginDate = faker.date.recent(60).toISOString()
+  const estimatedDate = faker.date.between(beginDate, faker.date.recent()).toISOString()
+  const billedDate = faker.date.between(estimatedDate, faker.date.recent()).toISOString()
+
   const project = {
     //fields
     id: i + 1,

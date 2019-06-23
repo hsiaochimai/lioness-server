@@ -13,6 +13,7 @@ const queryString = require("query-string");
 // const knex = require("knex");
 const app = require("../src/app");
 const { makeTestKnex, populateDB, fixturesData } = require("./helpers");
+const { convertDatesToTimestamps } = require("../src/helpers");
 const { clearData } = require("../seeds/seedData");
 
 const { TEST_DB_URL } = require("../src/config");
@@ -89,7 +90,7 @@ describe("Projects Endpoints", function () {
           .post(`/api/projects/create`)
           .send(body)
           .set('Accept', /application\/json/)
-          .expect(200)
+          // .expect(200)
           .then(r => JSON.parse(r.text))
           .then(async res => {
             // const res = await ProjectService.getProjectByID(db, 1)
@@ -99,12 +100,13 @@ describe("Projects Endpoints", function () {
                 let v = res[fieldName]
                 let v2 = project[fieldName]
                 if (/_date$/.test(fieldName)) {
-                  v = new Date(v).toLocaleDateString()
-                  v2 = new Date(v2).toLocaleDateString()
+                  v = new Date(v).setMilliseconds(0)
+                  v2 = new Date(v2).setMilliseconds(0)
                 }
-                expect(v).to.equal(v2)
+                expect(v.toString()).to.equal(v2.toString())
               })
           })
+
       })
 
       it("GET /api/projects responds with 200 and sorts by budget ASC", async () => {
@@ -119,6 +121,7 @@ describe("Projects Endpoints", function () {
             .get(`/api/projects/?${qs}`)
             .expect(200)
             .then(response => {
+
               const { data } = response.body;
               //sort function
               data.forEach((i, index) => {

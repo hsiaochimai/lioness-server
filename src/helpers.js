@@ -15,6 +15,29 @@ function expressTryCatchWrapper(fn) {
     }
 }
 
+const convertDatesToTimestamps = record => {
+    return
+    ['start_date', 'estimated_due_date', 'completion_date'].forEach(fieldName => {
+        if (record[fieldName]) {
+            // record[fieldName] = (new Date(record[fieldName])).getTime()
+            record[fieldName] = (new Date(record[fieldName])).toISOString()
+            console.log(`${fieldName}, ${record[fieldName]}`)
+        }
+    })
+}
+
+const timestampsToDates = record => {
+    ['start_date', 'estimated_due_date', 'completion_date'].forEach(fieldName => {
+        if (record[fieldName]) {
+            record[fieldName] = (new Date(record[fieldName])).toUTCString()
+            console.log(`${fieldName}, ${record[fieldName]}`)
+        }
+    })
+}
+
+
 module.exports = {
-    expressTryCatchWrapper
+    convertDatesToTimestamps,
+    timestampsToDates,
+    expressTryCatchWrapper,
 }

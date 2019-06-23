@@ -21,9 +21,9 @@ CREATE TABLE projects (
 	title text NOT NULL,
 	description text NOT NULL,
 	budget float8 NOT NULL,
-	start_date date NOT NULL,
-	estimated_due_date date NULL,
-	completion_date date NULL,
+	start_date timestamptz NOT NULL,
+	estimated_due_date timestamptz NULL,
+	completion_date timestamptz NULL,
 	manager_id int REFERENCES users(id) NOT NULL,
 	client_id int REFERENCES users(id) NOT NULL,
 	status_id int REFERENCES project_statuses(id) NOT NULL
