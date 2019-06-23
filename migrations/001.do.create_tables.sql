@@ -12,7 +12,8 @@ CREATE TABLE users (
     full_name TEXT NOT NULL,
     role_id INTEGER REFERENCES roles(id) NOT NULL,
     phone VARCHAR NOT NULL,
-    password VARCHAR NOT NULL
+    password VARCHAR NOT NULL,
+    inactive boolean NOT NULL
 
 );
 
