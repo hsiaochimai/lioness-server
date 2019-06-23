@@ -66,6 +66,43 @@ const populateUserProjects = async (user, knex) => {
 };
 
 const UsersService = {
+    upsertUser: async (knex, user) => {
+      // nullify empty values
+      Object.keys(user).forEach(k => {
+        if (user[k] === "") {
+         user[k] = null;
+        }
+      });
+  
+      let { id } = user;
+      const isNew = id === -1;
+      delete user.id;
+  
+      if (isNew) {
+        console.log(
+          await knex("user")
+            .insert(user, ["id"])
+            .toString()
+        );
+  
+        await knex("user")
+          .insert(user, ["id"])
+          .then(returnedInfo => {
+            console.log("INSERT got:", returnedInfo);
+            id = returnedInfo[0].id; //the INSERT ID
+            return returnedInfo;
+          });
+      } else {
+        await knex("users")
+          .where("id", "=", id)
+          .update(user)
+          .then(returnedInfo => {
+            console.log("UPDATE got:", returnedInfo);
+            return returnedInfo;
+          });
+      }
+      return id;
+    },
   getUsers: async (knex, mergedOpts) => {
     const users = knex("users");
     const counter = knex("users");
