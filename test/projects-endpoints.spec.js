@@ -67,11 +67,6 @@ describe("Projects Endpoints", function () {
       });
     });
     context("Given there are projects in the database", async () => {
-      // const testUsers = fixturesData.users;
-      // const testStatuses = fixturesData.statuses;
-      // const testRoles = fixturesData.roles;
-      // const testProjects = fixturesData.projects
-      // const testContractorProjects = fixturesData.contractor_projects
 
       it("Updates a project", async () => {
         await populateDB(db);
@@ -109,6 +104,71 @@ describe("Projects Endpoints", function () {
 
       })
 
+      it("creates a new project", async () => {
+        await populateDB(db);
+        let project=
+       { 
+        id:-1,
+        title : 'The Zoo',
+        budget : 0.5,
+        description : 'TL;DR',
+        client_id: 12,
+        manager_id: 9,
+        start_date:"Mon, 24 Jun 2019 00:00:00 GMT",
+        status_id:1,
+        estimated_due_date:null,
+        completion_date:null
+       }
+        let contractors=[{
+          "id": 6,
+          "email": "Shayna_Hammes@gmail.com",
+          "full_name": "Eldred Lueilwitz DDS",
+          "phone": "853-638-3814",
+          "password": "oANURWXRx_wB4TK",
+          "role_id": 3,
+          "inactive": false
+        },
+        {
+          "id": 7,
+          "email": "Earnestine98@yahoo.com",
+          "full_name": "Michale Maggio",
+          "phone": "583-367-8116",
+          "password": "sBoI4uKwU3ny7WL",
+          "role_id": 3,
+          "inactive": false
+        }]
+ 
+        const contractorIDs = contractors.map(c => c.id)
+        const body = {
+          project,
+          contractorIDs,
+        }
+
+        return supertest(app)
+          .post(`/api/projects/create`)
+          .send(body)
+          .set('Accept', /application\/json/)
+          // .expect(200)
+          .then(r => JSON.parse(r.text)
+          )
+          .then(async res => {
+            // const res = await ProjectService.getProjectByID(db, 1)
+            'title description budget start_date estimated_due_date completion_date client_id status_id manager_id'
+              .split(' ')
+              .forEach(fieldName => {
+                let v = res[fieldName]
+                let v2 = project[fieldName]
+                console.log(`res fieldnames`,v)
+                console.log(`project fieldnames`,v2)
+                if (/_date$/.test(fieldName)) {
+                v = new Date(v).setMilliseconds(0)
+                  v2 = new Date(v2).setMilliseconds(0)
+                }
+                expect(v.toString()).to.equal(v2.toString())
+              })
+          })
+
+      })
       it("GET /api/projects responds with 200 and sorts by budget ASC", async () => {
         await populateDB(db);
 
@@ -280,10 +340,7 @@ describe("Projects Endpoints", function () {
       it("Deletes a project", async () => {
         await populateDB(db);
         const idToRemove=2;
-        // const expectedProjects= ProjectService.getProjects(db).then(response=>{
-        //   const {data}=response.body;
-        //   data.filter(project=> project.id!==idToRemove)
-        // })
+      
         return supertest(app)
             .delete(`/api/projects/id/${idToRemove}`)
             // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
@@ -292,17 +349,10 @@ describe("Projects Endpoints", function () {
               supertest(app)
               .get(`/api/projects/id/${idToRemove}`)
               .expect(404)
-              // .then(response=>{
-              //   const {data}=response.body;
-              //   data.filter(project=> project.id!==idToRemove)
-              // })
+        
               )
          
       });
     });
   });
-  describe(`POST/api/project/create`, async () => {
-
-
-  })
 });
