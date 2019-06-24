@@ -15,5 +15,5 @@ module.exports = {
   database,
   username,
   password,
-  "ssl": true
+  "ssl": false
 }

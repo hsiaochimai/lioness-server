@@ -47,7 +47,7 @@ for (let i = 0; i < 2; i++) {
     phone: faker.phone.phoneNumberFormat(),
     password: faker.internet.password(),
     role_id: adminRole.id,
-    inactive:false,
+    inactive: false,
     //associated objects
     role: adminRole, //the role Object corresponding to the role_id
     // isAdmin: true,
@@ -96,7 +96,7 @@ for (let i = 2; true; i++) {
     phone: faker.phone.phoneNumberFormat(),
     password: faker.internet.password(),
     role_id: roleID,
-    inactive:false,
+    inactive: false,
     // isAdmin: false,
     //associated objects
     // role: roles.find(i => i.id === roleID), //the role Object corresponding to the role_id
