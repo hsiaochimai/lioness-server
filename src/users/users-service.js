@@ -108,7 +108,7 @@ const UsersService = {
             return returnedInfo;
           });
       }
-      return id;
+      return UsersService.getUserByID(knex, id);
     },
     deleteUser: async(knex, id)=>{
      
