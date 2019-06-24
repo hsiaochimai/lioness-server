@@ -30,5 +30,20 @@ usersRouter.route('/')
     const result = await UsersService.getUsers(knex, mergedOpts)
     res.json(result);
   }))
-
+usersRouter .route('/id/:id')
+.get(expressTryCatchWrapper(async (req, res) => {
+  const knex = req.app.get("db");
+  const result = await UsersService.getUserByID(knex, req.params.id)
+  res.json(result)
+}))
+.delete(expressTryCatchWrapper(async(req, res, next) => {
+  const knex = req.app.get("db");
+  await UsersService.deleteUser(knex, req.params.id)
+    .then(() => {
+      res.status(204)
+      .end()
+      
+    })
+    .catch(next);
+}))
 module.exports = usersRouter;

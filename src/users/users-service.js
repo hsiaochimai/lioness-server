@@ -66,6 +66,13 @@ const populateUserProjects = async (user, knex) => {
 };
 
 const UsersService = {
+  getUserByID: async (knex, id) => {
+    const user = await knex("users")
+      .where('id', '=', id)
+      .first()
+    await populateUserProjects(user, knex)
+    return user
+  },
     upsertUser: async (knex, user) => {
       // nullify empty values
       Object.keys(user).forEach(k => {
@@ -103,6 +110,16 @@ const UsersService = {
       }
       return id;
     },
+    deleteUser: async(knex, id)=>{
+     
+     await knex("users")
+     .where("id", "=", id)
+     .update('inactive', true)
+     .then(() => {
+       console.log(`deleted user is  ${id}`);
+     });
+     return(`did delete work?`)
+    },
   getUsers: async (knex, mergedOpts) => {
     const users = knex("users");
     const counter = knex("users");
@@ -111,10 +128,7 @@ const UsersService = {
       users.where("role_id", mergedOpts.roleFilter);
       counter.where("role_id", mergedOpts.roleFilter);
     }
-    if(mergedOpts.inactive===false){
-      users.where("inactive", false)
-      counter.where("inactive", false)
-    }
+  
     let totalItemCount = +(await counter.count("id"))[0].count;
     const numPages = Math.ceil(totalItemCount / ITEMS_PER_PAGE);
 
@@ -123,6 +137,7 @@ const UsersService = {
     }
     
     const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE;
+    users.where("inactive", false)
     users.offset(begin);
     users.limit(ITEMS_PER_PAGE);
 
