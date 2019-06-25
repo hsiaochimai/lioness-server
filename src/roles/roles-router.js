@@ -6,13 +6,11 @@ const rolesRouter = express.Router();
 
 rolesRouter
     .route('/')
-    .get(expressTryCatchWrapper((req, res, next) => {
+    .get(expressTryCatchWrapper(async (req, res) => {
         const knex = req.app.get("db");
-        RolesService.getRoles(knex)
-            .then(roles => {
-                res.json(roles);
-            })
-            .catch(next)
+        const result= await RolesService.getRoles(knex)
+           res.json(result)
+    
     }))
 
 module.exports = rolesRouter;

@@ -5,13 +5,10 @@ const { expressTryCatchWrapper } = require('../helpers')
 
 projectsStatusesRouter
     .route('/')
-    .get(expressTryCatchWrapper((req, res, next) => {
+    .get(expressTryCatchWrapper(async (req, res) => {
         const knex = req.app.get("db");
-        ProjectStatusesService.getProjectStatuses(knex)
-            .then(statuses => {
-                res.json(statuses);
-            })
-            .catch(next)
+       const result= await ProjectStatusesService.getProjectStatuses(knex)
+            res.json(result)
     }))
 
 module.exports = projectsStatusesRouter;
