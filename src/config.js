@@ -35,6 +35,8 @@ const usersDefaultOptions = {
   pageNumber: 1,
 }
 module.exports = {
+  JWT_EXPIRY: process.env.JWT_EXPIRY || '7d',
+  JWT_SECRET: process.env.JWT_SECRET,
 
   PORT: process.env.PORT || 8000,
   NODE_ENV: process.env.NODE_ENV || 'development',

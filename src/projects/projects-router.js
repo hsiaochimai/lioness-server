@@ -2,12 +2,15 @@
 require('json.date-extensions');
 const express = require("express");
 const bodyParser = require('body-parser');
+const passport = require('passport');
 const jsonParser = bodyParser.json();
 // const xss = require("xss");
 const ProjectsService = require("./projects-service");
 const projectsRouter = express.Router();
 const { expressTryCatchWrapper } = require('../helpers')
 // const jsonParser = express.json();
+const jwtAuth = passport.authenticate('jwt', { session: false });
+
 const SORT_ASC = 'ASC'
 const SORT_DESC = 'DESC'
 const ITEMS_PER_PAGE = 10
@@ -30,7 +33,7 @@ const projectsDefaultOptions = {
 
 projectsRouter
   .route('/create')
-  .post(jsonParser, expressTryCatchWrapper(async (req, res) => {
+  .post(jwtAuth, jsonParser, expressTryCatchWrapper(async (req, res) => {
     const knex = req.app.get("db");
     const { project, contractorIDs } = req.body
     const savedProject = await ProjectsService.upsertProject(knex, project, contractorIDs)
@@ -39,24 +42,24 @@ projectsRouter
 
 projectsRouter
   .route('/id/:id')
-  .get(expressTryCatchWrapper(async (req, res) => {
+  .get(jwtAuth, expressTryCatchWrapper(async (req, res) => {
     const knex = req.app.get("db");
     const result = await ProjectsService.getProjectByID(knex, req.params.id)
     res.json(result)
   }))
-  .delete(expressTryCatchWrapper(async(req, res, next) => {
+  .delete(jwtAuth, expressTryCatchWrapper(async (req, res, next) => {
     const knex = req.app.get("db");
     await ProjectsService.deleteProject(knex, req.params.id)
       .then(() => {
         res.status(204)
-        .end()
-        
+          .end()
+
       })
       .catch(next);
   }))
 projectsRouter
   .route('/')
-  .get(expressTryCatchWrapper(async (req, res) => {
+  .get(jwtAuth, expressTryCatchWrapper(async (req, res) => {
     const knex = req.app.get("db");
     const mergedOpts = { ...projectsDefaultOptions, ...req.query }
     const result = await ProjectsService.getProjects(knex, mergedOpts)
