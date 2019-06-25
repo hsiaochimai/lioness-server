@@ -1,15 +1,22 @@
 require('dotenv').config()
 const express = require('express')
+const passport = require('passport');
 const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
-const projectsRouter= require('./projects/projects-router')
-const rolesRouter=require('./roles/roles-router')
-const projectsStatusesRouter=require('./projectStatuses/projectStatuses-router')
-const usersRouter= require('./users/user-router')
+const projectsRouter = require('./projects/projects-router')
+const rolesRouter = require('./roles/roles-router')
+const projectsStatusesRouter = require('./projectStatuses/projectStatuses-router')
+const usersRouter = require('./users/user-router')
+const { router: loginRouter, localStrategy, jwtStrategy, } = require('./auth')
 const app = express()
 const winston = require('winston');
+
+app.use(passport.initialize());
+passport.use(localStrategy);
+passport.use(jwtStrategy);
+
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
@@ -53,10 +60,11 @@ app.use(function errorHandler(error, req, res, next) {
 
 app.use('/api/projects', projectsRouter)
 app.use('/api/roles', rolesRouter)
-app.use('/api/project-statuses',projectsStatusesRouter)
+app.use('/api/project-statuses', projectsStatusesRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/auth', loginRouter)
 
 app.get('/', (req, res) => {
- res.send('Hello, world!')
+  res.send('Hello, world!')
 })
 module.exports = app

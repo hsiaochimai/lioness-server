@@ -1,7 +1,8 @@
 const {
+  USER_SELECT_FIELDS,
   FETCH_INFO: { SORT_ASC, SORT_DESC, ITEMS_PER_PAGE },
-  ROLES: { ADMIN_ROLE, CLIENT_ROLE, MANAGER_ROLE, CONTRACTOR_ROLE } } = require('../config')
-  
+  ROLES: { ADMIN_ROLE, CLIENT_ROLE, MANAGER_ROLE, CONTRACTOR_ROLE, }, } = require('../config')
+
 const populateUserProjects = async (user, knex) => {
   const promises = [];
   const roleQuery = knex("roles")
@@ -68,74 +69,73 @@ const populateUserProjects = async (user, knex) => {
 const UsersService = {
   getUserByID: async (knex, id) => {
     const user = await knex("users")
+      .select(USER_SELECT_FIELDS)
       .where('id', '=', id)
       .first()
     await populateUserProjects(user, knex)
     return user
   },
-    upsertUser: async (knex, user) => {
-      // nullify empty values
-      Object.keys(user).forEach(k => {
-        if (user[k] === "") {
-         user[k] = null;
-        }
-      });
-  
-      let { id } = user;
-      const isNew = id === -1;
-      delete user.id;
-  
-      if (isNew) {
-        console.log(
-          await knex("user")
-            .insert(user, ["id"])
-            .toString()
-        );
-  
-        await knex("user")
-          .insert(user, ["id"])
-          .then(returnedInfo => {
-            console.log("INSERT got:", returnedInfo);
-            id = returnedInfo[0].id; //the INSERT ID
-            return returnedInfo;
-          });
-      } else {
-        await knex("users")
-          .where("id", "=", id)
-          .update(user)
-          .then(returnedInfo => {
-            console.log("UPDATE got:", returnedInfo);
-            return returnedInfo;
-          });
+  upsertUser: async (knex, user) => {
+    // nullify empty values
+    Object.keys(user).forEach(k => {
+      if (user[k] === "") {
+        user[k] = null;
       }
-      return UsersService.getUserByID(knex, id);
-    },
-    deleteUser: async(knex, id)=>{
-     
-     await knex("users")
-     .where("id", "=", id)
-     .update('inactive', true)
-     .then(() => {
-       console.log(`deleted user is  ${id}`);
-     });
-     return(`did delete work?`)
-    },
+    });
+
+    let { id } = user;
+    const isNew = id === -1;
+    delete user.id;
+
+    if (isNew) {
+      let q = knex("users")
+        .insert(user, ["id"])
+
+      console.log(
+        q.toString()
+      );
+      await q.then(returnedInfo => {
+        console.log("INSERT got:", returnedInfo);
+        id = returnedInfo[0].id; //the INSERT ID
+        return returnedInfo;
+      });
+    } else {
+      await knex("users")
+        .where("id", "=", id)
+        .update(user)
+        .then(returnedInfo => {
+          console.log("UPDATE got:", returnedInfo);
+          return returnedInfo;
+        });
+    }
+    return UsersService.getUserByID(knex, id);
+  },
+  deleteUser: async (knex, id) => {
+
+    return knex("users")
+      .where("id", "=", id)
+      .update('inactive', true)
+      .then(res => {
+        console.log(`deleted user is  ${id}`);
+        return res
+      });
+  },
   getUsers: async (knex, mergedOpts) => {
-    const users = knex("users");
+    const users = knex("users").select(USER_SELECT_FIELDS);
     const counter = knex("users");
 
     if (mergedOpts.roleFilter) {
       users.where("role_id", mergedOpts.roleFilter);
       counter.where("role_id", mergedOpts.roleFilter);
     }
-  
+
     let totalItemCount = +(await counter.count("id"))[0].count;
     const numPages = Math.ceil(totalItemCount / ITEMS_PER_PAGE);
 
     if (mergedOpts.userNameSort) {
       users.orderBy("full_name", mergedOpts.userNameSort);
     }
-    
+
     const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE;
     users.where("inactive", false)
     users.offset(begin);

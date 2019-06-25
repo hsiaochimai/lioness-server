@@ -1,5 +1,5 @@
 const { convertDatesToTimestamps, timestampsToDates } = require('../helpers')
-
+const { USER_SELECT_FIELDS } = require('../config')
 const populateProjectRelatedRecords = async (project, knex) => {
   const promises = [];
 
@@ -16,7 +16,7 @@ const populateProjectRelatedRecords = async (project, knex) => {
 
   //populate client object
   const clientQuery = knex("users")
-    .select("*")
+    .select(USER_SELECT_FIELDS)
     .where("id", project.client_id)
     .first();
   // console.log(clientQuery.toString())
@@ -27,7 +27,7 @@ const populateProjectRelatedRecords = async (project, knex) => {
 
   //populate manager object
   const managerQuery = knex("users")
-    .select("*")
+    .select(USER_SELECT_FIELDS)
     .where("id", project.manager_id)
     .first();
   // console.log(managerQuery.toString())
@@ -38,7 +38,7 @@ const populateProjectRelatedRecords = async (project, knex) => {
 
   //populate contractors object
   const contractorsQuery = knex("users")
-    .select("*")
+    .select(USER_SELECT_FIELDS)
     // .where('project_id', id)
     .innerJoin("contractors_projects", function () {
       this.on("users.id", "=", "contractors_projects.contractor_id").andOn(
@@ -81,7 +81,7 @@ const ProjectsService = {
     const isNew = id === -1;
     delete project.id;
     timestampsToDates(project)
-    
+
 
     if (isNew) {
       console.log(
@@ -126,23 +126,23 @@ const ProjectsService = {
 
     return ProjectsService.getProjectByID(knex, id);
   },
-deleteProject: async(knex, id)=>{
-  // let { id } = project;
- 
- await knex("contractors_projects")
- .where("project_id", "=", id)
- .del()
- .then(() => {
-   console.log(`deleted previous contractors for ${id}`);
- });
- await knex("projects")
-        .where("id", "=", id)
-        .del()
-        .then(() => {
-          console.log(`deleted project id is`, id);
-        });
- return(`did delete work?`)
-},
+  deleteProject: async (knex, id) => {
+    // let { id } = project;
+
+    await knex("contractors_projects")
+      .where("project_id", "=", id)
+      .del()
+      .then(() => {
+        console.log(`deleted previous contractors for ${id}`);
+      });
+    await knex("projects")
+      .where("id", "=", id)
+      .del()
+      .then(() => {
+        console.log(`deleted project id is`, id);
+      });
+    return (`did delete work?`)
+  },
   getProjects: async (knex, mergedOpts) => {
     const projects = knex("projects");
     const counter = knex("projects");

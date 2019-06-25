@@ -35,10 +35,14 @@ const usersDefaultOptions = {
   pageNumber: 1,
 }
 module.exports = {
+  JWT_EXPIRY: process.env.JWT_EXPIRY || '7d',
+  JWT_SECRET: process.env.JWT_SECRET,
+
   PORT: process.env.PORT || 8000,
   NODE_ENV: process.env.NODE_ENV || 'development',
   DB_URL: process.env.DATABASE_URL || 'postgresql://hsiaochimai@localhost:5432/lioness',
   TEST_DB_URL: process.env.TEST_DB_URL || 'postgresql://hsiaochimai@localhost:5432/lioness-test',
+  USER_SELECT_FIELDS: 'id, email, full_name, role_id, phone, inactive'.split(', '),
   ROLES: {
     ADMIN_ROLE,
     CLIENT_ROLE,
@@ -58,5 +62,5 @@ module.exports = {
     ITEMS_PER_PAGE,
   },
   projectsDefaultOptions,
-  usersDefaultOptions
+  usersDefaultOptions,
 }
