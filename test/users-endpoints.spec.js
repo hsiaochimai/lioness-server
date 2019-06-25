@@ -102,7 +102,7 @@ describe("Projects Endpoints", function() {
           .then(r => JSON.parse(r.text))
           .then(async res => {
             // const res = await ProjectService.getProjectByID(db, 1)
-            "email full_name role_id phone password inactive"
+            "email full_name role_id phone inactive"
               .split(" ")
               .forEach(fieldName => {
                 let v = res[fieldName];

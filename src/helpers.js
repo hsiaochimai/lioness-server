@@ -14,6 +14,13 @@ function expressTryCatchWrapper(fn) {
         }
     }
 }
+/**
+ * 
+ * @param {*} users an user object or an array of those
+ */
+function hidePassword(users) {
+    (Array.isArray(users) ? users : [users]).forEach(u => u.password = '__SERVER_SUPRESSED__')
+}
 
 const convertDatesToTimestamps = record => {
     return
@@ -37,6 +44,7 @@ const timestampsToDates = record => {
 
 
 module.exports = {
+    hidePassword,
     convertDatesToTimestamps,
     timestampsToDates,
     expressTryCatchWrapper,
