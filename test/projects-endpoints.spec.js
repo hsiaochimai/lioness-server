@@ -106,20 +106,21 @@ describe("Projects Endpoints", function () {
 
       it("creates a new project", async () => {
         await populateDB(db);
-        let project=
-       { 
-        id:-1,
-        title : 'The Zoo',
-        budget : 0.5,
-        description : 'TL;DR',
-        client_id: 12,
-        manager_id: 9,
-        start_date:"Mon, 24 Jun 2019 00:00:00 GMT",
-        status_id:1,
-        estimated_due_date:null,
-        completion_date:null
-       }
-        let contractors=[{
+        let project =
+        {
+          id: -1,
+          title: 'The Zoo',
+          budget: 0.5,
+          description: 'TL;DR',
+          client_id: 12,
+          manager_id: 9,
+          // start_date:"Mon, 24 Jun 2019 00:00:00 GMT",
+          start_date: new Date('06/24/2019'),
+          status_id: 1,
+          estimated_due_date: null,
+          completion_date: null
+        }
+        let contractors = [{
           "id": 6,
           "email": "Shayna_Hammes@gmail.com",
           "full_name": "Eldred Lueilwitz DDS",
@@ -137,7 +138,7 @@ describe("Projects Endpoints", function () {
           "role_id": 3,
           "inactive": false
         }]
- 
+
         const contractorIDs = contractors.map(c => c.id)
         const body = {
           project,
@@ -158,10 +159,10 @@ describe("Projects Endpoints", function () {
               .forEach(fieldName => {
                 let v = res[fieldName]
                 let v2 = project[fieldName]
-                console.log(`res fieldnames`,v)
-                console.log(`project fieldnames`,v2)
+                console.log(`res fieldnames`, v)
+                console.log(`project fieldnames`, v2)
                 if (/_date$/.test(fieldName)) {
-                v = new Date(v).setMilliseconds(0)
+                  v = new Date(v).setMilliseconds(0)
                   v2 = new Date(v2).setMilliseconds(0)
                 }
                 expect(v.toString()).to.equal(v2.toString())
@@ -339,19 +340,19 @@ describe("Projects Endpoints", function () {
       });
       it("Deletes a project", async () => {
         await populateDB(db);
-        const idToRemove=2;
-      
+        const idToRemove = 2;
+
         return supertest(app)
-            .delete(`/api/projects/id/${idToRemove}`)
-            // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
-            .expect(204)
-            .then(
-              supertest(app)
+          .delete(`/api/projects/id/${idToRemove}`)
+          // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
+          .expect(204)
+          .then(
+            supertest(app)
               .get(`/api/projects/id/${idToRemove}`)
               .expect(404)
-        
-              )
-         
+
+          )
+
       });
     });
   });
