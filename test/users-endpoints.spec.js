@@ -4,6 +4,8 @@ const {
   usersDefaultOptions
 } = require("../src/config");
 const queryString = require("query-string");
+const passport = require('passport');
+const jwtAuth = passport.authenticate('jwt', { session: false });
 // const knex = require("knex");
 const app = require("../src/app");
 const { makeTestKnex, populateDB, fixturesData } = require("./helpers");
@@ -103,6 +105,33 @@ describe("Projects Endpoints", function() {
           .then(async res => {
             // const res = await ProjectService.getProjectByID(db, 1)
             "email full_name role_id phone inactive"
+              .split(" ")
+              .forEach(fieldName => {
+                let v = res[fieldName];
+                let v2 = user[fieldName];
+                expect(v.toString()).to.equal(v2.toString());
+              });
+          });
+      });
+      it("Creates a user", async () => {
+        await populateDB(db);
+        let { projects, role, ...user } = await UsersService.getUserByID(db, -1);
+        user.email = "destroysociety33@hotmail.com";
+        user.phone = "703-724-9988";
+        user.full_name = "Christine Oberlin";
+        user.role_id=2,
+        user.password="Ihopethisworks1"
+        const body = {
+          user
+        };
+        return supertest(app)
+          .post(`/api/users/create`)
+          .send(body)
+          .set("Accept", /application\/json/)
+          .then(r => JSON.parse(r.text))
+          .then(async res => {
+            // const res = await ProjectService.getProjectByID(db, 1)
+            "email full_name role_id phone password inactive"
               .split(" ")
               .forEach(fieldName => {
                 let v = res[fieldName];
