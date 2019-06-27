@@ -5,6 +5,7 @@ const {
 } = require("../src/config");
 const queryString = require("query-string");
 const passport = require('passport');
+const request = require('supertest')
 const jwtAuth = passport.authenticate('jwt', { session: false });
 // const knex = require("knex");
 const app = require("../src/app");
@@ -15,13 +16,31 @@ const { TEST_DB_URL } = require("../src/config");
 const { API_TOKEN } = process.env;
 const UsersService = require("../src/users/users-service");
 const { expect, assert } = require("chai");
+let authToken;
 let db;
+
 describe("Projects Endpoints", function() {
+  const testLogin ={
+    email:"Mervin.Graham@hotmail.com",
+    password:"GAfJ8cFYg2J1SdS"
+  }
   before(() => {
     db = makeTestKnex();
     app.set("db", db);
-  });
-
+   return request(app)
+    .post('/api/auth/login')
+    .send(testLogin)
+.end(err, response=>{
+  console.log(`is this working`,response)
+  done()
+})
+// .end((response)=>{
+//   console.log(`hello auth`,response.body.token)
+//   authToken = response.body.token;
+//   done();
+// })
+  })
+ 
   // before(async () => {
 
   // })
