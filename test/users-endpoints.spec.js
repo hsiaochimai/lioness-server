@@ -24,22 +24,24 @@ describe("Projects Endpoints", function() {
     email:"Mervin.Graham@hotmail.com",
     password:"GAfJ8cFYg2J1SdS"
   }
-  before(() => {
+  before( () => {
     db = makeTestKnex();
     app.set("db", db);
-   return request(app)
-    .post('/api/auth/login')
-    .send(testLogin)
-.end(err, response=>{
-  console.log(`is this working`,response)
-  done()
+    console.log(`this is db`,db)
+//     await populateDB(db)
+//    await request(app)
+//     .post('/api/auth/login')
+//     .send(testLogin)
+// .then( response=>{
+//   console.log(`is this working`,response)
+//   done()
 })
 // .end((response)=>{
 //   console.log(`hello auth`,response.body.token)
 //   authToken = response.body.token;
 //   done();
 // })
-  })
+  
  
   // before(async () => {
 

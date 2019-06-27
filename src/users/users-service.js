@@ -1,7 +1,8 @@
 const {
   USER_SELECT_FIELDS,
   FETCH_INFO: { SORT_ASC, SORT_DESC, ITEMS_PER_PAGE },
-  ROLES: { ADMIN_ROLE, CLIENT_ROLE, MANAGER_ROLE, CONTRACTOR_ROLE, }, } = require('../config')
+  ROLES: { ADMIN_ROLE, CLIENT_ROLE, MANAGER_ROLE, CONTRACTOR_ROLE }
+} = require("../config");
 
 const populateUserProjects = async (user, knex) => {
   const promises = [];
@@ -15,15 +16,15 @@ const populateUserProjects = async (user, knex) => {
   promises.push(roleObj);
 
   //this will either be client projects or user projects
-  user.projects = []
+  user.projects = [];
 
   //populate client projects
   if (user.role_id === CLIENT_ROLE) {
     const clientProjectsQuery = knex("projects")
       .select("*")
-      .where('client_id', user.id)
+      .where("client_id", user.id);
     const clientProjectPromise = clientProjectsQuery.then(project => {
-      console.log(`Got ${project.length} client projects for user ${user.id}`)
+      console.log(`Got ${project.length} client projects for user ${user.id}`);
       user.projects = project;
     });
     promises.push(clientProjectPromise);
@@ -32,48 +33,53 @@ const populateUserProjects = async (user, knex) => {
   if (user.role_id === MANAGER_ROLE) {
     const managerProjectsQuery = knex("projects")
       .select("*")
-      .where('manager_id', user.id)
+      .where("manager_id", user.id);
 
     const managerProjectPromise = managerProjectsQuery.then(projects => {
       user.projects = projects;
-      console.log(`Got ${projects.length} manager projects for user ${user.id}`)
-    }
-    );
+      console.log(
+        `Got ${projects.length} manager projects for user ${user.id}`
+      );
+    });
     promises.push(managerProjectPromise);
   }
   if (user.role_id === CONTRACTOR_ROLE) {
     const contractorsProjectsQuery = knex("projects")
       .select("*")
       // .where('project_id', id)
-      .innerJoin("contractors_projects", function () {
+      .innerJoin("contractors_projects", function() {
         this.on("projects.id", "=", "contractors_projects.project_id").andOn(
           "contractors_projects.contractor_id",
           "=",
           user.id
         );
       });
-    console.log(`hello contractors!`, contractorsProjectsQuery.toString())
+    console.log(`hello contractors!`, contractorsProjectsQuery.toString());
 
     // console.log(contractorsQuery.toString())
 
-    const contractorsProjectsPromise = contractorsProjectsQuery.then(projects => {
-      console.log(`Got ${projects.length} contractor projects for user ${user.id}`)
-      user.projects = projects;
-    });
+    const contractorsProjectsPromise = contractorsProjectsQuery.then(
+      projects => {
+        console.log(
+          `Got ${projects.length} contractor projects for user ${user.id}`
+        );
+        user.projects = projects;
+      }
+    );
 
     promises.push(contractorsProjectsPromise);
   }
-  return Promise.all(promises)
+  return Promise.all(promises);
 };
 
 const UsersService = {
   getUserByID: async (knex, id) => {
     const user = await knex("users")
       .select(USER_SELECT_FIELDS)
-      .where('id', '=', id)
-      .first()
-    await populateUserProjects(user, knex)
-    return user
+      .where("id", "=", id)
+      .first();
+    await populateUserProjects(user, knex);
+    return user;
   },
   upsertUser: async (knex, user) => {
     // nullify empty values
@@ -88,12 +94,9 @@ const UsersService = {
     delete user.id;
 
     if (isNew) {
-      let q = knex("users")
-        .insert(user, ["id"])
+      let q = knex("users").insert(user, ["id"]);
 
-      console.log(
-        q.toString()
-      );
+      console.log(q.toString());
       await q.then(returnedInfo => {
         console.log("INSERT got:", returnedInfo);
         id = returnedInfo[0].id; //the INSERT ID
@@ -111,13 +114,12 @@ const UsersService = {
     return UsersService.getUserByID(knex, id);
   },
   deleteUser: async (knex, id) => {
-
     return knex("users")
       .where("id", "=", id)
-      .update('inactive', true)
+      .update("inactive", true)
       .then(res => {
         console.log(`deleted user is  ${id}`);
-        return res
+        return res;
       });
   },
   getUsers: async (knex, mergedOpts) => {
@@ -128,7 +130,14 @@ const UsersService = {
       users.where("role_id", mergedOpts.roleFilter);
       counter.where("role_id", mergedOpts.roleFilter);
     }
-
+    if (mergedOpts.searchQuery) {
+      users
+      .where(knex.raw("full_name", "like",`%${mergedOpts.searchQuery}%`)
+      .orWhere("email", "like",`%${mergedOpts.searchQuery}%`);
+      counter
+        .where("full_name", "like",`%${mergedOpts.searchQuery}%`)
+        .orWhere("email", "like",`%${mergedOpts.searchQuery}%`);
+    }
     let totalItemCount = +(await counter.count("id"))[0].count;
     const numPages = Math.ceil(totalItemCount / ITEMS_PER_PAGE);
 
@@ -137,27 +146,25 @@ const UsersService = {
     }
 
     const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE;
-    users.where("inactive", false)
+    users.where("inactive", false);
     users.offset(begin);
     users.limit(ITEMS_PER_PAGE);
 
     console.log(users.toString());
 
-    let result = []
+    let result = [];
     await users.select("*").then(data => {
       result = data;
-    })
-    let promises = []
-    result.forEach(
-      user => promises.push(populateUserProjects(user, knex))
-    )
-    await Promise.all(promises)
+    });
+    let promises = [];
+    result.forEach(user => promises.push(populateUserProjects(user, knex)));
+    await Promise.all(promises);
     return {
       data: result,
       numPages,
       totalItemCount,
-      params: mergedOpts,
-    }
+      params: mergedOpts
+    };
   }
 };
 module.exports = UsersService;
