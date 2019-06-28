@@ -132,11 +132,12 @@ const UsersService = {
     }
     if (mergedOpts.searchQuery) {
       users
-      .where(knex.raw("full_name", "like",`%${mergedOpts.searchQuery}%`)
+      .where("full_name", "like",`%${mergedOpts.searchQuery}%`)
       .orWhere("email", "like",`%${mergedOpts.searchQuery}%`);
       counter
         .where("full_name", "like",`%${mergedOpts.searchQuery}%`)
         .orWhere("email", "like",`%${mergedOpts.searchQuery}%`);
+    
     }
     let totalItemCount = +(await counter.count("id"))[0].count;
     const numPages = Math.ceil(totalItemCount / ITEMS_PER_PAGE);
