@@ -158,26 +158,12 @@ for (let i = 0; i < 30; i++) {
     client_id: client.id,
     status_id: projectStatus.id,
     manager_id: manager.id,
-    //associated objects
-    // status: projectStatus,
-    // client: client, //relation based on client_id
-    // contractors: contractorsArr,
-    // manager: manager
+  
   };
-  // contractorsArr.filter((i, index, arr) => {
-  //   const existing = arr.findIndex(e => e.id === i.id)
-  //   if (existing !== index) {
-  //     console.log(`duplicate contractor ${i.id} for project ${project.id}`)
-  //     return false
-  //   }
-  // })
 
-  // contractorsArr.forEach(c => c.projects.push(project))
-  // client.projects.push(project);  
-  // manager.projects.push(project);
   contractorsArr.forEach(c => contractors_projects.push({ contractor_id: c.id, project_id: project.id }))
 
-  // users.projects = [project];
+
   projects.push(project);
 
 }
@@ -187,15 +173,14 @@ const collections = JSON.stringify({
   projects,
   contractors_projects,
   roles,
-  // project_statuses: statuses,
+  
   statuses,
 }, 2, 2);
 
-// console.log(collections);
+
 fs.writeFile('./fixturesData.json', collections, (err) => {
-  // throws an error, you could also catch it here
+ 
   if (err) throw err;
 
-  // success case, the file was saved
-  // console.log('Fake data saved!');
+ 
 });

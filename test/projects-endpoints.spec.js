@@ -45,8 +45,6 @@ const doLogin = () => supertest(app)
   .set('Accept', 'application/json')
   .expect('Content-Type', /json/)
   .then(r => {
-    console.log('AUTH RESP', r.body)
-    // process.exit(0)
     authToken = r.body.authToken
   })
 describe("Projects Endpoints", function () {
@@ -57,9 +55,6 @@ describe("Projects Endpoints", function () {
     await doLogin()
   });
 
-  // before(async () => {
-
-  // })
 
   after(async () => {
     await db.destroy();
@@ -72,7 +67,6 @@ describe("Projects Endpoints", function () {
     context(`Given no projects`, () => {
       it(`responds with 200 and an empty list`, async () => {
         await clearData(db);
-        // await populateDB(db)
         return supertest(app)
           .get("/api/projects")
           .set({ Authorization: `Bearer ${authToken}` })
@@ -103,10 +97,9 @@ describe("Projects Endpoints", function () {
           .post(`/api/projects/create`)
           .send(body)
           .set({ Authorization: `Bearer ${authToken}` })
-          // .expect(200)
+          
           .then(r => JSON.parse(r.text))
           .then(async res => {
-            // const res = await ProjectService.getProjectByID(db, 1)
             'title description budget start_date estimated_due_date completion_date client_id status_id manager_id'
               .split(' ')
               .forEach(fieldName => {
@@ -132,7 +125,6 @@ describe("Projects Endpoints", function () {
           description: 'TL;DR',
           client_id: 12,
           manager_id: 9,
-          // start_date:"Mon, 24 Jun 2019 00:00:00 GMT",
           start_date: new Date('06/24/2019'),
           status_id: 1,
           estimated_due_date: null,
@@ -167,18 +159,16 @@ describe("Projects Endpoints", function () {
           .post(`/api/projects/create`)
           .send(body)
           .set({ Authorization: `Bearer ${authToken}` })
-          // .expect(200)
+        
           .then(r => JSON.parse(r.text)
           )
           .then(async res => {
-            // const res = await ProjectService.getProjectByID(db, 1)
+       
             'title description budget start_date estimated_due_date completion_date client_id status_id manager_id'
               .split(' ')
               .forEach(fieldName => {
                 let v = res[fieldName]
                 let v2 = project[fieldName]
-                console.log(`res fieldnames`, v)
-                console.log(`project fieldnames`, v2)
                 if (/_date$/.test(fieldName)) {
                   v = new Date(v).setMilliseconds(0)
                   v2 = new Date(v2).setMilliseconds(0)
@@ -203,14 +193,14 @@ describe("Projects Endpoints", function () {
             .then(response => {
 
               const { data } = response.body;
-              //sort function
+            
               data.forEach((i, index) => {
                 if (index < data.length - 2) {
                   expect(data[index].budget < data[index + 1].budget).to.be
                     .true;
                 }
               });
-              //filter .forEach
+            
             })
         );
       });
@@ -228,13 +218,13 @@ describe("Projects Endpoints", function () {
             .expect(200)
             .then(response => {
               const { data } = response.body;
-              //sort function
+             
               data.forEach((i, index) => {
                 if (index < data.length - 2) {
                   expect(data[index].status_id === 1).to.be.true;
                 }
               });
-              //filter .forEach
+            
             })
         );
       });
@@ -259,8 +249,7 @@ describe("Projects Endpoints", function () {
               dateSort: SORT_ASC,
             }
             let qs = queryString.stringify(opts);
-            console.log(qs);
-
+            
             const p1 = supertest(app)
               .get(`/api/projects/?${qs}`)
               .set({ Authorization: `Bearer ${authToken}` })
@@ -311,7 +300,6 @@ describe("Projects Endpoints", function () {
             .expect(200)
             .then(response => {
               const { data } = response.body;
-              console.log(`this is the length`, data.length);
               data.forEach((i, index) => {
                 if (index < data.length - 2) {
                   expect(
@@ -340,7 +328,6 @@ describe("Projects Endpoints", function () {
             .expect(200)
             .then(response => {
               const { data } = response.body;
-              console.log(`this is the length`, data.length);
               data.forEach((i, index) => {
                 if (index < data.length - 2) {
                   expect(

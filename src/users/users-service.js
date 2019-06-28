@@ -24,7 +24,6 @@ const populateUserProjects = async (user, knex) => {
       .select("*")
       .where("client_id", user.id);
     const clientProjectPromise = clientProjectsQuery.then(project => {
-      console.log(`Got ${project.length} client projects for user ${user.id}`);
       user.projects = project;
     });
     promises.push(clientProjectPromise);
@@ -37,9 +36,6 @@ const populateUserProjects = async (user, knex) => {
 
     const managerProjectPromise = managerProjectsQuery.then(projects => {
       user.projects = projects;
-      console.log(
-        `Got ${projects.length} manager projects for user ${user.id}`
-      );
     });
     promises.push(managerProjectPromise);
   }
@@ -54,15 +50,12 @@ const populateUserProjects = async (user, knex) => {
           user.id
         );
       });
-    console.log(`hello contractors!`, contractorsProjectsQuery.toString());
 
-    // console.log(contractorsQuery.toString())
+
+  
 
     const contractorsProjectsPromise = contractorsProjectsQuery.then(
       projects => {
-        console.log(
-          `Got ${projects.length} contractor projects for user ${user.id}`
-        );
         user.projects = projects;
       }
     );
@@ -96,9 +89,8 @@ const UsersService = {
     if (isNew) {
       let q = knex("users").insert(user, ["id"]);
 
-      console.log(q.toString());
+   
       await q.then(returnedInfo => {
-        console.log("INSERT got:", returnedInfo);
         id = returnedInfo[0].id; //the INSERT ID
         return returnedInfo;
       });
@@ -107,7 +99,6 @@ const UsersService = {
         .where("id", "=", id)
         .update(user)
         .then(returnedInfo => {
-          console.log("UPDATE got:", returnedInfo);
           return returnedInfo;
         });
     }
@@ -118,7 +109,6 @@ const UsersService = {
       .where("id", "=", id)
       .update("inactive", true)
       .then(res => {
-        console.log(`deleted user is  ${id}`);
         return res;
       });
   },
@@ -151,7 +141,6 @@ const UsersService = {
     users.offset(begin);
     users.limit(ITEMS_PER_PAGE);
 
-    console.log(users.toString());
 
     let result = [];
     await users.select("*").then(data => {
