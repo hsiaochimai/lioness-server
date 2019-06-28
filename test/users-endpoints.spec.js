@@ -36,49 +36,19 @@ const doLogin = () => supertest(app)
   })
   .set('Accept', 'application/json')
   .expect('Content-Type', /json/)
-
-
-
   .then(r => {
     console.log('AUTH RESP', r.body)
     // process.exit(0)
     authToken = r.body.authToken
   })
-
-
-
 describe("Projects Endpoints", function () {
-  // const testLogin = {
-  //   email: "Mervin.Graham@hotmail.com",
-  //   password: "GAfJ8cFYg2J1SdS"
-  // }
+ 
   before(async () => {
     db = makeTestKnex();
     app.set("db", db);
     setKnexInstance(db)
-
     await doLogin()
-
-
-    //     await populateDB(db)
-    //    await request(app)
-    //     .post('/api/auth/login')
-    //     .send(testLogin)
-    // .then( response=>{
-    //   console.log(`is this working`,response)
-    //   done()
   })
-  // .end((response)=>{
-  //   console.log(`hello auth`,response.body.token)
-  //   authToken = response.body.token;
-  //   done();
-  // })
-
-
-  // before(async () => {
-
-  // })
-
   after(async () => {
     await db.destroy();
     console.log("server closed");
@@ -107,8 +77,7 @@ describe("Projects Endpoints", function () {
         let opts = { ...usersDefaultOptions, userNameSort: SORT_ASC };
         const qs = queryString.stringify(opts);
         await UsersService.getUsers(db, opts);
-        await doLogin()
-
+        // await doLogin()
         return supertest(app)
           .get(`/api/users/?${qs}`)
           .set({ Authorization: `Bearer ${authToken}` })
@@ -133,6 +102,7 @@ describe("Projects Endpoints", function () {
 
         return supertest(app)
           .get(`/api/users/?${qs}`)
+          .set({ Authorization: `Bearer ${authToken}` })
           .expect(200)
           .then(response => {
             const { data } = response.body;
@@ -156,7 +126,7 @@ describe("Projects Endpoints", function () {
         return supertest(app)
           .post(`/api/users/create`)
           .send(body)
-          .set("Accept", /application\/json/)
+          .set({ Authorization: `Bearer ${authToken}` })
           .then(r => JSON.parse(r.text))
           .then(async res => {
             // const res = await ProjectService.getProjectByID(db, 1)
@@ -171,23 +141,28 @@ describe("Projects Endpoints", function () {
       });
       it("Creates a user", async () => {
         await populateDB(db);
-        let { projects, role, ...user } = await UsersService.getUserByID(db, -1);
-        user.email = "destroysociety33@hotmail.com";
-        user.phone = "703-724-9988";
-        user.full_name = "Christine Oberlin";
-        user.role_id = 2,
-          user.password = "Ihopethisworks1"
+        let user= 
+       { id:-1,
+         email : "destroysociety33@hotmail.com",
+        phone: "703-724-9988",
+        full_name : "Christine Oberlin",
+        role_id : 2,
+        password : "Ihopethisworks1",
+        inactive:false
+        }
         const body = {
           user
         };
+        console.log(body)
         return supertest(app)
           .post(`/api/users/create`)
+          .set({ Authorization: `Bearer ${authToken}` })
           .send(body)
-          .set("Accept", /application\/json/)
           .then(r => JSON.parse(r.text))
           .then(async res => {
+            console.log(`wtf is going on`, res)
             // const res = await ProjectService.getProjectByID(db, 1)
-            "email full_name role_id phone password inactive"
+            "email full_name role_id phone inactive"
               .split(" ")
               .forEach(fieldName => {
                 let v = res[fieldName];
@@ -203,6 +178,7 @@ describe("Projects Endpoints", function () {
         return supertest(app)
           .delete(`/api/users/id/${idToRemove}`)
           // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
+          .set({ Authorization: `Bearer ${authToken}` })
           .expect(204)
           .then(
             supertest(app)
