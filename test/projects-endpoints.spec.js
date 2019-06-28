@@ -20,8 +20,9 @@ const { TEST_DB_URL } = require("../src/config");
 const { API_TOKEN } = process.env;
 const ProjectService = require("../src/projects/projects-service");
 const { expect, assert } = require("chai");
+const { setKnexInstance } = require('../src/auth/strategies')
 let db;
-
+let authToken
 function checkSort(arr, testFn) {
   arr.forEach((i, index) => {
     if (index < arr.length - 2) {
@@ -32,11 +33,28 @@ function checkSort(arr, testFn) {
   })
 }
 
+const doLogin = () => supertest(app)
+  .post(
+    '/api/auth/login')
 
+  // method: 'POST',
+  .send({
+    email: 'Mervin.Graham@hotmail.com',
+    password: 'GAfJ8cFYg2J1SdS',
+  })
+  .set('Accept', 'application/json')
+  .expect('Content-Type', /json/)
+  .then(r => {
+    console.log('AUTH RESP', r.body)
+    // process.exit(0)
+    authToken = r.body.authToken
+  })
 describe("Projects Endpoints", function () {
-  before(() => {
+  before(async () => {
     db = makeTestKnex();
     app.set("db", db);
+    setKnexInstance(db)
+    await doLogin()
   });
 
   // before(async () => {
@@ -57,7 +75,7 @@ describe("Projects Endpoints", function () {
         // await populateDB(db)
         return supertest(app)
           .get("/api/projects")
-          .set("Authorization", `Bearer ${API_TOKEN}`)
+          .set({ Authorization: `Bearer ${authToken}` })
           .expect(200, {
             data: [],
             numPages: 0,
@@ -84,7 +102,7 @@ describe("Projects Endpoints", function () {
         return supertest(app)
           .post(`/api/projects/create`)
           .send(body)
-          .set('Accept', /application\/json/)
+          .set({ Authorization: `Bearer ${authToken}` })
           // .expect(200)
           .then(r => JSON.parse(r.text))
           .then(async res => {
@@ -148,7 +166,7 @@ describe("Projects Endpoints", function () {
         return supertest(app)
           .post(`/api/projects/create`)
           .send(body)
-          .set('Accept', /application\/json/)
+          .set({ Authorization: `Bearer ${authToken}` })
           // .expect(200)
           .then(r => JSON.parse(r.text)
           )
@@ -180,6 +198,7 @@ describe("Projects Endpoints", function () {
         return (
           supertest(app)
             .get(`/api/projects/?${qs}`)
+            .set({ Authorization: `Bearer ${authToken}` })
             .expect(200)
             .then(response => {
 
@@ -205,7 +224,7 @@ describe("Projects Endpoints", function () {
         return (
           supertest(app)
             .get(`/api/projects/?${qs}`)
-            // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
+            .set({ Authorization: `Bearer ${authToken}` })
             .expect(200)
             .then(response => {
               const { data } = response.body;
@@ -244,6 +263,7 @@ describe("Projects Endpoints", function () {
 
             const p1 = supertest(app)
               .get(`/api/projects/?${qs}`)
+              .set({ Authorization: `Bearer ${authToken}` })
               .expect(200)
               .then(response => {
                 const { data } = response.body;
@@ -257,6 +277,7 @@ describe("Projects Endpoints", function () {
             qs = queryString.stringify(opts);
             const p2 = supertest(app)
               .get(`/api/projects/?${qs}`)
+              .set({ Authorization: `Bearer ${authToken}` })
               .expect(200)
               .then(response => {
                 const { data } = response.body;
@@ -286,7 +307,7 @@ describe("Projects Endpoints", function () {
         return (
           supertest(app)
             .get(`/api/projects/?${qs}`)
-            // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
+            .set({ Authorization: `Bearer ${authToken}` })
             .expect(200)
             .then(response => {
               const { data } = response.body;
@@ -298,10 +319,6 @@ describe("Projects Endpoints", function () {
                   ).to.be.true;
                 }
               });
-
-              // sort function
-
-              //filter .forEach
             })
         );
       });
@@ -319,7 +336,7 @@ describe("Projects Endpoints", function () {
         return (
           supertest(app)
             .get(`/api/projects/?${qs}`)
-            // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
+            .set({ Authorization: `Bearer ${authToken}` })
             .expect(200)
             .then(response => {
               const { data } = response.body;
@@ -344,7 +361,7 @@ describe("Projects Endpoints", function () {
 
         return supertest(app)
           .delete(`/api/projects/id/${idToRemove}`)
-          // .expect(200,ProjectService.getProjects(db, budgetSort=ASC));
+          .set({ Authorization: `Bearer ${authToken}` })
           .expect(204)
           .then(
             supertest(app)
