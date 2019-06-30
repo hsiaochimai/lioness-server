@@ -4,6 +4,7 @@
   "description": "This is a boilerplate project used for starting new projects!",
   "main": "index.js",
   "scripts": {
+    "build": "npm run migrate-production 0 && npm run migrate-production && npm run seed-data",
     "test": "mocha --require test/setup.js --exit -R dot",
     "dev": "nodemon src/server.js",
     "migrate-production": "postgrator --config postgrator-production-config.js",
