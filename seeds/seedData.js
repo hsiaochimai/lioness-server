@@ -2,6 +2,7 @@ const fjs = require('flatted/cjs');
 const { parse, stringify } = fjs
 const fs = require('fs')
 const db = require('../src/db')
+const path = require('path')
 
 function handleError(e) {
     console.error('ERROR', e.message)
@@ -122,7 +123,10 @@ module.exports = { clearData, seedData }
 
 if (require.main === module) { //if called as node seedData.js
     const knex = db()
-    const dataString = fs.readFileSync('./seeds/flattenedData.json', 'utf8');
+    const dataPath = path.join(__dirname, 'flattenedData.json')
+
+
+    const dataString = fs.readFileSync(dataPath, 'utf8');
     let data = parse(dataString);
 
     seedData(data, knex).finally(() => {
