@@ -42,7 +42,7 @@ module.exports = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   DB_URL: process.env.DATABASE_URL || 'postgresql://hsiaochimai@localhost:5432/lioness',
   TEST_DB_URL: process.env.TEST_DB_URL || 'postgresql://hsiaochimai@localhost:5432/lioness-test',
-  USER_SELECT_FIELDS: 'id, email, full_name, role_id, phone, inactive'.split(', '),
+  USER_SELECT_FIELDS: 'users.id, email, full_name, role_id, phone, inactive'.split(', '),
   ROLES: {
     ADMIN_ROLE,
     CLIENT_ROLE,

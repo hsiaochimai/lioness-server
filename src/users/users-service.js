@@ -1,4 +1,5 @@
 const {
+  PROJECT_STATUESES: { STATUS_IN_PROGRESS },
   USER_SELECT_FIELDS,
   FETCH_INFO: { SORT_ASC, SORT_DESC, ITEMS_PER_PAGE },
   ROLES: { ADMIN_ROLE, CLIENT_ROLE, MANAGER_ROLE, CONTRACTOR_ROLE }
@@ -43,7 +44,7 @@ const populateUserProjects = async (user, knex) => {
     const contractorsProjectsQuery = knex("projects")
       .select("*")
       // .where('project_id', id)
-      .innerJoin("contractors_projects", function() {
+      .innerJoin("contractors_projects", function () {
         this.on("projects.id", "=", "contractors_projects.project_id").andOn(
           "contractors_projects.contractor_id",
           "=",
@@ -52,7 +53,7 @@ const populateUserProjects = async (user, knex) => {
       });
 
 
-  
+
 
     const contractorsProjectsPromise = contractorsProjectsQuery.then(
       projects => {
@@ -89,7 +90,7 @@ const UsersService = {
     if (isNew) {
       let q = knex("users").insert(user, ["id"]);
 
-   
+
       await q.then(returnedInfo => {
         id = returnedInfo[0].id; //the INSERT ID
         return returnedInfo;
@@ -113,7 +114,21 @@ const UsersService = {
       });
   },
   getUsers: async (knex, mergedOpts) => {
-    const users = knex("users").select(USER_SELECT_FIELDS);
+    const users = knex("users")
+      .select([
+        ...USER_SELECT_FIELDS,
+        // knex.raw("count(contractors_projects.project_id) as active_projects")
+      ])
+      // .leftJoin("contractors_projects", "id", "contractors_projects.contractor_id")
+      // // .innerJoin("projects", "id", "contractors_projects.project_id")
+      // .leftJoin("projects", function () {
+      //   this.on("projects.id", "=", "contractors_projects.project_id").andOn(
+      //     "projects.status_id",
+      //     "=",
+      //     STATUS_IN_PROGRESS
+      //   );
+      // })
+      // .groupBy("users.id")
     const counter = knex("users");
 
     if (mergedOpts.roleFilter) {
@@ -122,18 +137,22 @@ const UsersService = {
     }
     if (mergedOpts.searchQuery) {
       users
-      .where("full_name", "like",`%${mergedOpts.searchQuery}%`)
-      .orWhere("email", "like",`%${mergedOpts.searchQuery}%`);
+        .where("full_name", "ilike", `%${mergedOpts.searchQuery}%`)
+        .orWhere("email", "ilike", `%${mergedOpts.searchQuery}%`);
       counter
-        .where("full_name", "like",`%${mergedOpts.searchQuery}%`)
-        .orWhere("email", "like",`%${mergedOpts.searchQuery}%`);
-    
+        .where("full_name", "ilike", `%${mergedOpts.searchQuery}%`)
+        .orWhere("email", "ilike", `%${mergedOpts.searchQuery}%`);
+
     }
     let totalItemCount = +(await counter.count("id"))[0].count;
     const numPages = Math.ceil(totalItemCount / ITEMS_PER_PAGE);
 
     if (mergedOpts.userNameSort) {
       users.orderBy("full_name", mergedOpts.userNameSort);
+    }
+
+    if (mergedOpts.activeProjSort) {
+      users.orderBy("active_projects", mergedOpts.activeProjSort);
     }
 
     const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE;
@@ -143,9 +162,12 @@ const UsersService = {
 
 
     let result = [];
-    await users.select("*").then(data => {
-      result = data;
-    });
+    console.log(users.toString())
+    await users
+      .then(data => {
+        result = data;
+      });
+
     let promises = [];
     result.forEach(user => promises.push(populateUserProjects(user, knex)));
     await Promise.all(promises);
