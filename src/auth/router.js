@@ -27,9 +27,10 @@ function localAuth(req, res, next) {
       session: false,
     },
     function (err, user, info) {
-      if (err) {
-        console.log("AUTH ERR !!!!", err.toString())
-        return res.status(400).json(err)
+      if (err || !user) {
+        let msg = info ? info.message : 'Invalid credentials'
+        console.log("AUTH ERR !!!!", msg)
+        return res.status(400).json({ error: msg })
       }
       req.user = user
       const authToken = createAuthToken(JSON.stringify(req.user));
