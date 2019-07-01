@@ -114,26 +114,60 @@ const UsersService = {
       });
   },
   getUsers: async (knex, mergedOpts) => {
-    const users = knex("users")
-      .select([
-        ...USER_SELECT_FIELDS,
-        // knex.raw("count(contractors_projects.project_id) as active_projects")
-      ])
-      // .leftJoin("contractors_projects", "id", "contractors_projects.contractor_id")
-      // // .innerJoin("projects", "id", "contractors_projects.project_id")
-      // .leftJoin("projects", function () {
-      //   this.on("projects.id", "=", "contractors_projects.project_id").andOn(
-      //     "projects.status_id",
-      //     "=",
-      //     STATUS_IN_PROGRESS
-      //   );
-      // })
-      // .groupBy("users.id")
+    let users = knex("users")
+
     const counter = knex("users");
 
     if (mergedOpts.roleFilter) {
       users.where("role_id", mergedOpts.roleFilter);
       counter.where("role_id", mergedOpts.roleFilter);
+      switch (+mergedOpts.roleFilter) {
+        case CONTRACTOR_ROLE:
+          users.select([
+            ...USER_SELECT_FIELDS,
+            knex.raw("count(projects.id) as active_projects")
+          ])
+          users.joinRaw(`
+          LEFT JOIN 
+          contractors_projects on users.id = contractors_projects.contractor_id 
+          LEFT JOIN projects on projects.status_id=${STATUS_IN_PROGRESS} AND projects.id = contractors_projects.project_id`)
+            .groupBy("users.id")
+          if (mergedOpts.activeProjSort) {
+            users.orderBy("active_projects", mergedOpts.activeProjSort);
+          }
+          break;
+        case MANAGER_ROLE:
+          users.select([
+            ...USER_SELECT_FIELDS,
+            knex.raw("count(projects.id) as active_projects")
+          ])
+          users.joinRaw(`           
+              LEFT JOIN projects on projects.status_id=${STATUS_IN_PROGRESS} AND projects.manager_id = users.id`)
+            .groupBy("users.id")
+          if (mergedOpts.activeProjSort) {
+            users.orderBy("active_projects", mergedOpts.activeProjSort);
+          }
+          break;
+        case CLIENT_ROLE:
+          users.select([
+            ...USER_SELECT_FIELDS,
+            knex.raw("count(projects.id) as active_projects")
+          ])
+          users.joinRaw(`           
+              LEFT JOIN projects on projects.status_id=${STATUS_IN_PROGRESS} AND projects.client_id = users.id`)
+            .groupBy("users.id")
+          if (mergedOpts.activeProjSort) {
+            users.orderBy("active_projects", mergedOpts.activeProjSort);
+          }
+          break;
+
+        default:
+          users
+            .select([
+              ...USER_SELECT_FIELDS,
+            ])
+          break;
+      }
     }
     if (mergedOpts.searchQuery) {
       users
@@ -151,9 +185,7 @@ const UsersService = {
       users.orderBy("full_name", mergedOpts.userNameSort);
     }
 
-    if (mergedOpts.activeProjSort) {
-      users.orderBy("active_projects", mergedOpts.activeProjSort);
-    }
+
 
     const begin = (mergedOpts.pageNumber - 1) * ITEMS_PER_PAGE;
     users.where("inactive", false);
