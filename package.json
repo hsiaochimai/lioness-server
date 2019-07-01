@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run migrate-production 0 && npm run migrate-production && npm run seed-data",
-    "test": "mocha --require test/setup.js --exit -R dot",
+    "test": "mocha --require test/setup.js --timeout 10000 --exit -R dot",
     "dev": "nodemon src/server.js",
     "migrate-production": "postgrator --config postgrator-production-config.js",
     "migrate-test": "postgrator --config postgrator-test-config.js",

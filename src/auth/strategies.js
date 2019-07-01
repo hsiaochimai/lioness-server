@@ -18,38 +18,9 @@ const localStrategy = new LocalStrategy(
   },
   async (email, password, callback) => {
     let user = { name: 'Foo' };
-    // User.findOne({ username: username })
-    //   .then(_user => {
-    //     user = _user;
-    //     if (!user) {
-    //       // Return a rejected promise so we break out of the chain of .thens.
-    //       // Any errors like this will be handled in the catch block.
-    //       return Promise.reject({
-    //         reason: 'LoginError',
-    //         message: 'Incorrect username or password'
-    //       });
-    //     }
-    //     return user.validatePassword(password);
-    //   })
-    //   .then(isValid => {
-    //     if (!isValid) {
-    //       return Promise.reject({
-    //         reason: 'LoginError',
-    //         message: 'Incorrect username or password'
-    //       });
-    //     }
-    //     return callback(null, user);
-    //   })
-    //   .catch(err => {
-    //     if (err.reason === 'LoginError') {
-    //       return callback(null, false, err);
-    //     }
-    //     return callback(err, false);
-    //   });
 
-    // good
     user = await knex('users')
-      .where('email', '=', email)
+      .where(knex.raw('LOWER(email)'), '=', ('' + email).toLowerCase())
       .first()
       .then(result => {
         return result
