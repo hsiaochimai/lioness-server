@@ -1,26 +1,51 @@
-# Lioness Server!
+# Lioness-Server
+Lioness is a project management tool, built to organize your organization's projects, clients, project managers and contractors.
+This is the server that stores all data. 
 
-This is a boilerplate project used for starting new projects!
+## API Documentation 
+Roles
+* GET to '/api/roles' to view all roles of users
 
-## Set up
+Project Statuses
+* GET to '/api/project-statuses' to view all statuses of projects 
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+Users
+* GET '/api/users'
+    * Query Parameters
+        * searchQuery: searches users full name and email based on keyword
+        * userNameSort: sorts users by name in either ascending or descending order
+        * activeProjSort: sorts users by how many active projects they have
+        * roleFilter: filters users by their role id,
+        * pageNumber: filters users by which page number their results are on, 10 results per page
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
+* POST '/api/users' creates a new user
+* POST '/api/users/:id'edits an existing user
+* DELETE '/api/users/:id' marks a user as inactive 
 
-## Scripts
+Projects
+* GET '/api/projects'
+    * Query Parameters
+         * statusFilter: filters projects by theit status id,
+         * budgetSort: sorts project by budget in either ascending or descending order,
+         * dateTypeFilter: filters projects by a by a type of date either start date, estimated due date, or completion date
+         * dateSort: sorts projects by dates based on their date type filter either ascending or descending ,
+         * afterDate: filters projects after a given date based on the date type filter chosen
+         * beforeDate: filters projects before a given date based on the date type filter chosen,
+         * pageNumber: filters projects by which page number their results are on, 10 results per page
+* POST '/api/projects' creates a new project
+* POST '/api/projects/:id' updates a new project
+* DELETE '/api/projects/:id' deletes a single project based on id 
 
-Start the application `npm start`
+POST '/api/auth/login' matches given credentials and provides a JWT Token.
 
-Start nodemon for the application `npm run dev`
+## Technology Used
+* Node.js
+* Express
+* Mocha
+* Chai
+* Postgres
+* Passport
+* Knex.js
 
-Run the tests `npm test`
-
-## Deploying
-
-When your new project is ready for deployment, add a new Heroku application with `heroku create`. This will make a new git remote called "heroku" and you can then `npm run deploy` which will push to this remote's master branch.
+## Security
+Application uses JWT authentication
