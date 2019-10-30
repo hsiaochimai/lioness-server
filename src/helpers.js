@@ -23,6 +23,7 @@ function hidePassword(users) {
 }
 
 const convertDatesToTimestamps = record => {
+    //return
     ['start_date', 'estimated_due_date', 'completion_date'].forEach(fieldName => {
         if (record[fieldName]) {
             // record[fieldName] = (new Date(record[fieldName])).getTime()
