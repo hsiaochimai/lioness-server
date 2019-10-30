@@ -109,8 +109,8 @@ const UsersService = {
     return knex("users")
       .where("id", "=", id)
       .update("inactive", true)
-      .then(res => {
-        return res;
+      .then(() => {
+        return true;
       });
   },
   getUsers: async (knex, mergedOpts) => {

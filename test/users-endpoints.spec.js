@@ -166,18 +166,23 @@ describe("Projects Endpoints", function () {
         await populateDB(db);
         const idToRemove = 3;
 
-        return supertest(app)
+        await supertest(app)
           .delete(`/api/users/id/${idToRemove}`)
           .set({ Authorization: `Bearer ${authToken}` })
           .expect(204)
-          .then(
-            supertest(app)
+         
+           return await supertest(app)
               .get(`/api/users/id/${idToRemove}`)
-              .then(r => JSON.parse(r.text))
+              .set({ Authorization: `Bearer ${authToken}` })
+              .then(r => 
+                {
+                  // console.log(`this is the whole thing`,JSON.parse(r.text))
+                 return JSON.parse(r.text)})
               .then(res => {
-                expect(res.inactive === true).to.be.true
+                expect(res.inactive).to.be.true
               })
-          )
+              .catch(e=>console.error(e))
+          
 
       });
     });
