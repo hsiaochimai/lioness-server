@@ -30,7 +30,7 @@
     "dayjs": "^1.10.4",
     "dotenv": "^7.0.0",
     "es6-promise": "^4.2.8",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "faker": "^4.1.0",
     "flatted": "^2.0.2",
     "helmet": "^4.6.0",
