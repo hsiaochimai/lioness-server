@@ -37,7 +37,7 @@
     "isomorphic-fetch": "^3.0.0",
     "json.date-extensions": "^1.2.2",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^0.17.6",
+    "knex": "^2.4.0",
     "morgan": "^1.10.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
